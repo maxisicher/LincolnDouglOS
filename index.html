@@ -51,6 +51,10 @@
         .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
         .case-card { background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.3s; color: white; }
         .case-card:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-3px); }
+        
+        /* TRANSPARENT TRASH CAN */
+        .trash-icon { opacity: 0.4; transition: opacity 0.2s; cursor: pointer; }
+        .trash-icon:hover { opacity: 1.0; }
 
         #workspace { display: flex; flex: 1; overflow: hidden; background: #fff; }
         #main-section { width: 40%; min-width: 250px; padding: 20px; background: #eaeff2; overflow-y: auto; box-sizing: border-box; }
@@ -102,9 +106,9 @@
         <button class="stopwatch-btn" onclick="resetTimer()">RESET</button>
     </div>
     <div style="flex:1"></div>
-    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; background: #fff9c4; color: #857b26;">📝 Quick Note</button>
+    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; background: #fff9c4; color: #857b26;">Quick Note</button>
     <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ New Block</button>
-    <button class="btn" onclick="toggleSettings()">⚙️</button>
+    <button class="btn" onclick="toggleSettings(event)">Settings</button>
     
     <div id="settings-popup" class="action-popup">
         <button class="menu-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
@@ -113,7 +117,7 @@
 </div>
 
 <div id="speech-win">
-    <div id="speech-head"><span>LD Speaker Order</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
+    <div id="speech-head"><span>LD Speaker Order</span><span onclick="toggleSpeech()" style="cursor:pointer">CLOSE</span></div>
     <table class="speech-table">
         <thead><tr><th>Speech</th><th style="text-align: right;">Time</th></tr></thead>
         <tbody>
@@ -157,7 +161,7 @@
 </div>
 
 <div id="sticky-note">
-    <div id="sticky-header"><span>FLOATING FLOW NOTE</span><span onclick="toggleNotes()" style="cursor:pointer">×</span></div>
+    <div id="sticky-header"><span>FLOATING FLOW NOTE</span><span onclick="toggleNotes()" style="cursor:pointer">CLOSE</span></div>
     <textarea id="sticky-content" placeholder="Type and drag to sidebar..." oninput="saveNotes()"></textarea>
 </div>
 
@@ -165,7 +169,6 @@
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
     let currentCaseIdx = null, currentTabIdx = null;
 
-    // RESIZER
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
     resizer.addEventListener('mousedown', (e) => {
@@ -188,9 +191,9 @@
             const card = document.createElement('div'); card.className = 'case-card';
             card.onclick = () => openCase(i);
             card.innerHTML = `<strong>${c.name}</strong>
-                <div style="position:absolute; top:20px; right:15px; display:flex; gap:10px;">
-                    <div onclick="toggleCaseMenu(event, ${i})">⋮</div>
-                    <div onclick="deleteCase(event, ${i})">🗑️</div>
+                <div style="position:absolute; top:20px; right:15px; display:flex; gap:12px;">
+                    <div style="cursor:pointer; font-weight:bold;" onclick="toggleCaseMenu(event, ${i})">⋮</div>
+                    <div class="trash-icon" onclick="deleteCase(event, ${i})">🗑️</div>
                 </div>
                 <div id="case-menu-${i}" class="action-popup" style="display:none; top:40px; right:0;">
                     <button class="menu-btn" onclick="renameCase(event, ${i})">Rename</button>
@@ -201,9 +204,22 @@
     }
 
     function toggleCaseMenu(e, i) { e.stopPropagation(); closeMenus(); document.getElementById(`case-menu-${i}`).style.display = 'flex'; }
-    function toggleSettings() { closeMenus(); document.getElementById('settings-popup').style.display = 'flex'; }
-    function closeMenus() { document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); }
-    window.onclick = (e) => { if (!e.target.closest('.action-popup') && !e.target.closest('.logo-box')) closeMenus(); };
+    
+    function toggleSettings(e) { 
+        if(e) e.stopPropagation();
+        const popup = document.getElementById('settings-popup');
+        const isVisible = popup.style.display === 'flex';
+        closeMenus(); 
+        popup.style.display = isVisible ? 'none' : 'flex'; 
+    }
+
+    function closeMenus() { 
+        document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); 
+    }
+
+    window.onclick = (e) => { 
+        if (!e.target.closest('.action-popup') && !e.target.closest('.btn')) closeMenus(); 
+    };
 
     function openCase(i) {
         currentCaseIdx = i;
@@ -226,7 +242,7 @@
             d.onclick = () => selectTab(i);
             d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
-                    <button class="menu-btn" onclick="tabify(event, ${i})">⤴ Tabify (Sticky)</button>
+                    <button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>
                     <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
                 </div>`;
             list.appendChild(d);
