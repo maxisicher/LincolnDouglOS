@@ -11,79 +11,81 @@
             --font-main: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
-        body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: white; }
+        body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Toolbar with Themed Buttons */
+        /* Toolbar */
         #toolbar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; background: white; gap: 10px; z-index: 100; flex-shrink: 0; }
         .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); border-right: 1px solid var(--border); padding-right: 15px; }
         .logo-circle { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: serif; }
 
         .nav-btn { 
-            padding: 6px 14px; 
-            border: 1px solid var(--accent); 
+            padding: 6px 12px; 
+            border: 1px solid var(--border); 
             background: white; 
-            color: var(--accent);
             border-radius: 6px; 
-            font-weight: 700; 
+            font-weight: 600; 
             cursor: pointer; 
             font-family: var(--font-main);
             font-size: 13px;
-            transition: 0.2s;
         }
-        .nav-btn:hover { background: var(--accent); color: white; }
 
-        /* Home Screen: Google Docs Style Grid */
+        /* Home Screen Background */
         #home-screen { 
             position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); 
             background: radial-gradient(circle at top left, #003a70, #001529);
             z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; 
         }
-        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 40px auto; width: 100%; }
 
-        /* LIQUID GLASS - Google Docs Card Style */
-        .case-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+        /* Liquid Glass Buttons/Cards */
+        .glass-btn, .case-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.7);
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.15, 0.83, 0.66, 1);
         }
-        .case-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.25); }
+        .glass-btn { padding: 12px 30px; font-weight: 700; border: none; }
+        .case-card { padding: 30px; position: relative; margin-top: 40px; }
 
-        .glass-btn { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-            border: 1px solid white; color: white; padding: 12px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; backdrop-filter: blur(10px);
-        }
-
-        /* DRAGGABLE WINDOWS */
+        /* Floating Windows (Speech & Stopwatch) */
         .floating-win { 
-            position: absolute; width: 320px; background: rgba(255, 255, 255, 0.98); 
-            border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-            display: none; z-index: 2000; border: 1px solid #ddd; overflow: hidden;
-            touch-action: none; /* Crucial for iPad dragging */
+            position: absolute; 
+            width: 380px; 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            border-radius: 16px; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4); 
+            display: none; 
+            z-index: 2000; 
+            top: 80px; 
+            left: 30%; 
+            border: 1px solid #e2e8f0; 
+            overflow: hidden; 
         }
-        .win-head { padding: 12px; background: var(--accent); color: white; display: flex; justify-content: space-between; font-weight: 700; cursor: move; }
+        .win-head { padding: 15px; background: var(--accent); color: white; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; cursor: move; }
 
-        /* Timer UI */
-        .timer-display { font-family: monospace; font-size: 42px; font-weight: 700; text-align: center; padding: 20px; color: var(--accent); }
-        .timer-ctrls { display: flex; gap: 8px; padding: 0 15px 15px; }
-        .timer-btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 700; color: white; cursor: pointer; }
+        /* Stopwatch UI */
+        .timer-display { font-family: 'Courier New', monospace; font-size: 48px; font-weight: 700; text-align: center; padding: 20px; color: var(--accent); }
+        .timer-ctrls { display: flex; gap: 10px; padding: 0 20px 20px; }
+        .timer-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; color: white; }
+        .start { background: #28a745; }
+        .stop { background: #dc3545; }
+        .reset { background: #6c757d; }
 
-        /* Workspace Layout */
-        #workspace { display: none; flex: 1; overflow: hidden; }
-        #main-section { width: 40%; padding: 20px; background: #f0f2f5; overflow-y: auto; }
-        #resizer { width: 10px; cursor: col-resize; background: #e0e0e0; }
-        #right-zone { flex: 1; padding: 40px; background: white; overflow-y: auto; }
-        .doc { outline: none; font-size: 16px; line-height: 1.6; }
+        /* Workspace */
+        #workspace { display: none; flex: 1; overflow: hidden; background: #fff; }
+        #main-section { width: 38%; padding: 20px; background: #eaeff2; overflow-y: auto; }
+        #resizer { width: 16px; margin: 0 -8px; cursor: col-resize; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        #resizer::after { content: ""; width: 4px; height: 40px; background: #cbd5e0; border-radius: 10px; }
+        #right-zone { flex: 1; display: flex; overflow: hidden; }
+        #tab-view { flex: 1; padding: 45px; overflow-y: auto; }
+        .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; }
     </style>
 </head>
 <body>
@@ -98,32 +100,32 @@
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; color: white;">
-        <h1 style="font-weight: 800; font-size: 32px;">Strategic Case Files</h1>
+        <h1 style="font-weight: 800; letter-spacing: -0.5px; font-size: 36px;">Strategic Case Files</h1>
         <button class="glass-btn" onclick="createNewCase()">+ New Case</button>
     </div>
-    <div class="case-grid" id="case-grid"></div>
+    <div class="case-grid" id="case-grid" style="max-width: 1200px; margin: 0 auto; width: 100%;"></div>
 </div>
 
-<div id="speech-win" class="floating-win" style="top: 100px; left: 50px;">
-    <div class="win-head" onmousedown="dragElement(this.parentElement)"><span>Speech Times</span><span onclick="toggleWin('speech-win')" style="cursor:pointer">×</span></div>
-    <div style="padding:10px; font-size: 13px;">
-        <table style="width:100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;">1AC</td><td style="text-align:right; font-weight:700;">6:00</td></tr>
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;">1NC</td><td style="text-align:right; font-weight:700;">7:00</td></tr>
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;">1AR</td><td style="text-align:right; font-weight:700;">4:00</td></tr>
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px;">NR</td><td style="text-align:right; font-weight:700;">6:00</td></tr>
-            <tr><td style="padding:8px;">2AR</td><td style="text-align:right; font-weight:700;">3:00</td></tr>
+<div id="speech-win" class="floating-win">
+    <div class="win-head"><span>Protocol Reference</span><span onclick="toggleWin('speech-win')" style="cursor:pointer">×</span></div>
+    <div style="padding:10px;">
+        <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+            <tr style="border-bottom: 1px solid #eee;"><td style="padding:10px;">1AC</td><td style="text-align:right; font-weight:700;">6 Min</td></tr>
+            <tr style="border-bottom: 1px solid #eee;"><td style="padding:10px;">1NC</td><td style="text-align:right; font-weight:700;">7 Min</td></tr>
+            <tr style="border-bottom: 1px solid #eee;"><td style="padding:10px;">1AR</td><td style="text-align:right; font-weight:700;">4 Min</td></tr>
+            <tr style="border-bottom: 1px solid #eee;"><td style="padding:10px;">NR</td><td style="text-align:right; font-weight:700;">6 Min</td></tr>
+            <tr><td style="padding:10px;">2AR</td><td style="text-align:right; font-weight:700;">3 Min</td></tr>
         </table>
     </div>
 </div>
 
-<div id="timer-win" class="floating-win" style="top: 100px; left: 400px;">
-    <div class="win-head" onmousedown="dragElement(this.parentElement)"><span>Stopwatch</span><span onclick="toggleWin('timer-win')" style="cursor:pointer">×</span></div>
+<div id="timer-win" class="floating-win">
+    <div class="win-head"><span>Round Timer</span><span onclick="toggleWin('timer-win')" style="cursor:pointer">×</span></div>
     <div class="timer-display" id="display">00:00:00</div>
     <div class="timer-ctrls">
-        <button class="timer-btn" style="background:#28a745" onclick="startTimer()">Start</button>
-        <button class="timer-btn" style="background:#dc3545" onclick="stopTimer()">Stop</button>
-        <button class="timer-btn" style="background:#6c757d" onclick="resetTimer()">Reset</button>
+        <button class="timer-btn start" onclick="startTimer()">Start</button>
+        <button class="timer-btn stop" onclick="stopTimer()">Stop</button>
+        <button class="timer-btn reset" onclick="resetTimer()">Reset</button>
     </div>
 </div>
 
@@ -131,81 +133,98 @@
     <div id="main-section"><div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div></div>
     <div id="resizer"></div>
     <div id="right-zone">
-        <div id="tab-view" contenteditable="true" class="doc"><h1>Research Notes</h1><p>Start citing here...</p></div>
+        <div id="tab-view">
+            <div id="active-title" style="font-size:34px; margin-bottom:25px; outline:none; font-weight: 300;" contenteditable="true"></div>
+            <div id="active-body" style="outline:none; line-height:1.8; font-size:17px;" contenteditable="true"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    let cases = JSON.parse(localStorage.getItem('eduardos_data_v8')) || [];
+    let cases = JSON.parse(localStorage.getItem('eduardos_data_v7')) || [];
     let currentCaseIdx = null;
 
-    // --- DRAG LOGIC (iPad & Mouse Compatible) ---
-    function dragElement(elmnt) {
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        const header = elmnt.querySelector('.win-head');
-        header.onmousedown = dragMouseDown;
-        header.ontouchstart = dragMouseDown;
+    // --- STOPWATCH LOGIC ---
+    let startTime, tInterval;
+    let running = false;
+    let pausedTime = 0;
 
-        function dragMouseDown(e) {
-            e.preventDefault();
-            pos3 = e.clientX || e.touches[0].clientX;
-            pos4 = e.clientY || e.touches[0].clientY;
-            document.onmouseup = closeDragElement;
-            document.ontouchend = closeDragElement;
-            document.onmousemove = elementDrag;
-            document.ontouchmove = elementDrag;
-        }
-
-        function elementDrag(e) {
-            e.preventDefault();
-            let clientX = e.clientX || e.touches[0].clientX;
-            let clientY = e.clientY || e.touches[0].clientY;
-            pos1 = pos3 - clientX;
-            pos2 = pos4 - clientY;
-            pos3 = clientX;
-            pos4 = clientY;
-            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-        }
-
-        function closeDragElement() {
-            document.onmouseup = null;
-            document.onmousemove = null;
-            document.ontouchend = null;
-            document.ontouchmove = null;
+    function startTimer() {
+        if (!running) {
+            startTime = new Date().getTime() - pausedTime;
+            tInterval = setInterval(getShowTime, 10);
+            running = true;
         }
     }
-
-    // --- TIMER LOGIC ---
-    let startTime, tInterval, running = false, pausedTime = 0;
-    function startTimer() { if(!running){ startTime = new Date().getTime() - pausedTime; tInterval = setInterval(getShowTime, 10); running = true; }}
-    function stopTimer() { if(running){ clearInterval(tInterval); pausedTime = new Date().getTime() - startTime; running = false; }}
-    function resetTimer() { clearInterval(tInterval); pausedTime = 0; running = false; document.getElementById('display').innerHTML = "00:00:00"; }
+    function stopTimer() {
+        if (running) {
+            clearInterval(tInterval);
+            pausedTime = new Date().getTime() - startTime;
+            running = false;
+        }
+    }
+    function resetTimer() {
+        clearInterval(tInterval);
+        pausedTime = 0;
+        running = false;
+        document.getElementById('display').innerHTML = "00:00:00";
+    }
     function getShowTime() {
-        let diff = new Date().getTime() - startTime;
-        let m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000), ms = Math.floor((diff % 1000) / 10);
-        document.getElementById('display').innerHTML = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s)+":"+(ms<10?"0"+ms:ms);
+        let currentTime = new Date().getTime();
+        let difference = currentTime - startTime;
+        let mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        let secs = Math.floor((difference % (1000 * 60)) / 1000);
+        let ms = Math.floor((difference % 1000) / 10);
+        document.getElementById('display').innerHTML = 
+            (mins < 10 ? "0" + mins : mins) + ":" + 
+            (secs < 10 ? "0" + secs : secs) + ":" + 
+            (ms < 10 ? "0" + ms : ms);
     }
 
-    // --- CASE LOGIC ---
-    function toggleWin(id) { let el = document.getElementById(id); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
-    function showHome() { document.getElementById('home-screen').style.display = "flex"; document.getElementById('workspace').style.display = "none"; renderHome(); }
+    // --- UI LOGIC ---
+    function toggleWin(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+
     function renderHome() {
+        document.getElementById('home-screen').style.display = "flex";
+        document.getElementById('workspace').style.display = "none";
         const grid = document.getElementById('case-grid'); grid.innerHTML = '';
         cases.forEach((c, i) => {
             const card = document.createElement('div');
             card.className = 'case-card';
             card.onclick = () => openCase(i);
-            card.innerHTML = `<div style="font-weight:800; font-size: 18px;">${c.name}</div><div style="font-size:10px; opacity:0.7;">POLISCI RESEARCH v8.0</div>`;
+            card.innerHTML = `<div style="font-weight:800; font-size: 22px;">${c.name}</div><div style="font-size:11px; margin-top:6px; opacity:0.8; font-weight:700;">DOSSIER FILE</div>`;
             grid.appendChild(card);
         });
     }
-    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('main-editor').innerHTML = cases[i].mainContent || '<h1>Untitled Case</h1>'; }
-    function createNewCase() { let n = prompt("Case Name:"); if(n) { cases.push({ name: n, mainContent: "<h1>" + n + "</h1>" }); save(); renderHome(); } }
-    function save() { localStorage.setItem('eduardos_data_v8', JSON.stringify(cases)); }
+
+    function openCase(i) {
+        currentCaseIdx = i;
+        document.getElementById('home-screen').style.display = "none";
+        document.getElementById('workspace').style.display = "flex";
+        document.getElementById('main-editor').innerHTML = cases[i].mainContent || '<h1>Enter data...</h1>';
+    }
+
+    function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>" + n + "</h1>" }); save(); renderHome(); } }
+    function save() { localStorage.setItem('eduardos_data_v7', JSON.stringify(cases)); }
+    function showHome() { renderHome(); }
     function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
 
     renderHome();
+
+    // Resizer Logic
+    const resizer = document.getElementById('resizer');
+    const leftSide = document.getElementById('main-section');
+    resizer.addEventListener('mousedown', (e) => {
+        const resize = (ev) => {
+            let width = (ev.clientX / window.innerWidth) * 100;
+            if (width > 20 && width < 70) leftSide.style.width = width + '%';
+        };
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', () => document.removeEventListener('mousemove', resize));
+    });
 </script>
 </body>
 </html>
