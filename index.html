@@ -2,108 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DebateOS - Argument Retrieval Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DebateOS</title>
     <style>
         :root {
             --primary-bg: #ffffff;
             --sidebar-bg: #f8f9fa;
             --border-color: #dadce0;
-            --header-gray: #5f6368;
             --accent-blue: #1a73e8;
         }
 
-        body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #e8eaed; }
 
         /* Toolbar */
-        #toolbar { height: 48px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 15px; background: var(--sidebar-bg); gap: 10px; }
-        .btn { padding: 6px 12px; border: 1px solid var(--border-color); background: white; cursor: pointer; border-radius: 4px; font-size: 13px; }
-        .btn:hover { background: #f1f3f4; }
+        #toolbar { height: 50px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 15px; background: var(--sidebar-bg); gap: 12px; z-index: 10; }
+        .btn { padding: 8px 16px; border: 1px solid var(--border-color); background: white; cursor: pointer; border-radius: 6px; font-size: 14px; font-weight: 500; }
+        .btn:active { background: #e0e0e0; }
 
-        /* Workspace Layout */
+        /* Workspace */
         #workspace { display: flex; flex: 1; overflow: hidden; }
-        #main-case-container { width: 35%; border-right: 2px solid var(--border-color); padding: 20px; background: #f1f3f4; overflow-y: auto; display: flex; justify-content: center; }
-        .doc-page { width: 100%; max-width: 800px; background: white; min-height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.12); padding: 40px; box-sizing: border-box; outline: none; white-space: pre-wrap; }
-        #tab-content-view { flex: 1; padding: 20px; overflow-y: auto; background: white; }
-        #tab-sidebar { width: 20%; border-left: 1px solid var(--border-color); background: var(--sidebar-bg); }
-        .tab-item { padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; background: white; margin: 5px; border-radius: 8px; font-size: 14px; }
-        .tab-item.active { border-left: 4px solid var(--accent-blue); background: #e8f0fe; }
-
-        /* --- NEW: MOVABLE SPEECH WINDOW STYLES --- */
-        #speech-window {
-            position: absolute;
-            z-index: 999;
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            width: 450px;
-            height: 350px;
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            resize: both;
-            overflow: auto;
-            border-radius: 8px;
-            top: 100px;
-            left: 40%;
-        }
-
-        #speech-header {
-            padding: 10px;
-            cursor: move;
-            z-index: 1000;
-            background-color: var(--accent-blue);
-            color: white;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            border-top-left-radius: 7px;
-            border-top-right-radius: 7px;
-        }
-
-        #speech-body { padding: 15px; font-size: 12px; flex: 1; overflow-y: auto; }
         
+        /* Main Case (Left) */
+        #main-case-container { width: 35%; border-right: 2px solid var(--border-color); padding: 20px; background: #f1f3f4; overflow-y: auto; }
+        .doc-page { width: 100%; background: white; min-height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.12); padding: 30px; box-sizing: border-box; outline: none; }
+
+        /* Tab Content (Middle) */
+        #tab-content-view { flex: 1; padding: 20px; overflow-y: auto; background: white; }
+        .active-header { border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; margin-bottom: 20px; outline: none; font-size: 22px; font-weight: bold; }
+
+        /* Sidebar (Right) */
+        #tab-sidebar { width: 20%; border-left: 1px solid var(--border-color); background: var(--sidebar-bg); overflow-y: auto; }
+        .tab-item { padding: 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; background: white; margin: 8px; border-radius: 8px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .tab-item.active { background: #e8f0fe; border: 1px solid var(--accent-blue); }
+        .del-btn { color: red; font-weight: bold; padding: 5px; }
+
+        /* Speech Window (Movable) */
+        #speech-window {
+            position: absolute; z-index: 100; background: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 320px; display: none; flex-direction: column;
+            top: 60px; left: 40%; border: 1px solid #ccc;
+        }
+        #speech-header { padding: 12px; cursor: move; background: var(--accent-blue); color: white; border-radius: 11px 11px 0 0; display: flex; justify-content: space-between; touch-action: none; }
+        #speech-body { padding: 15px; font-size: 13px; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+
+        /* Home Screen Overlay */
+        #home-screen {
+            position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px);
+            background: white; z-index: 50; display: none; flex-direction: column; align-items: center; padding-top: 50px;
+        }
     </style>
 </head>
 <body>
 
     <div id="toolbar">
-        <button class="btn" style="color: blue; font-weight: bold;">❐ New Case</button>
-        <button class="btn" style="color: green; font-weight: bold;">⌂ Home</button>
-        <button class="btn" onclick="toggleSpeechWindow()" style="background-color: #fff9c4; border-color: #fbc02d;">⏱ Speech Times</button>
+        <button class="btn" onclick="newCase()" style="color: #1a73e8;">❐ New Case</button>
+        <button class="btn" onclick="toggleHome()" style="color: #188038;">⌂ Home</button>
+        <button class="btn" onclick="toggleSpeech()">⏱ Times</button>
         <div style="flex:1"></div>
-        <button class="btn" onclick="addNewTab()" style="color: green;">+ Add Tab</button>
+        <button class="btn" onclick="addTab()" style="background: #e6f4ea; color: #137333; border-color: #ceead6;">+ Add Tab</button>
+    </div>
+
+    <div id="home-screen">
+        <h1>Welcome to DebateOS</h1>
+        <p>Your cases and rebuttals are saved locally.</p>
+        <button class="btn" onclick="toggleHome()">Return to Editor</button>
     </div>
 
     <div id="speech-window">
-        <div id="speech-header">
-            <span>LD Speech Order</span>
-            <span onclick="toggleSpeechWindow()" style="cursor:pointer;">×</span>
+        <div id="speech-header" id="dragheader">
+            <span>Speech Times</span>
+            <span onclick="toggleSpeech()" style="cursor:pointer">×</span>
         </div>
         <div id="speech-body">
             <table>
-                <tr><th>Speech</th><th>Side</th><th>Time</th></tr>
-                <tr><td>Aff Constructive (1AC)</td><td>Aff</td><td>6 min</td></tr>
-                <tr><td>Cross-Ex of Aff</td><td>Both</td><td>3 min</td></tr>
-                <tr><td>Neg Constructive (1NC)</td><td>Neg</td><td>7 min</td></tr>
-                <tr><td>Cross-Ex of Neg</td><td>Both</td><td>3 min</td></tr>
-                <tr><td>1st Aff Rebuttal (1AR)</td><td>Aff</td><td>4 min</td></tr>
-                <tr><td>Neg Rebuttal (2NR)</td><td>Neg</td><td>6 min</td></tr>
-                <tr><td>2nd Aff Rebuttal (2AR)</td><td>Aff</td><td>3 min</td></tr>
+                <tr><td>1AC</td><td>6 min</td></tr>
+                <tr><td>CX</td><td>3 min</td></tr>
+                <tr><td>1NC</td><td>7 min</td></tr>
+                <tr><td>1AR</td><td>4 min</td></tr>
+                <tr><td>2NR</td><td>6 min</td></tr>
+                <tr><td>2AR</td><td>3 min</td></tr>
             </table>
-            <p style="font-size: 10px; margin-top: 10px; color: gray;">*Based on standard LD timing regulations.</p>
         </div>
     </div>
 
     <div id="workspace">
         <div id="main-case-container">
-            <div class="doc-page" contenteditable="true"><b>Main Case Document...</b></div>
+            <div id="main-editor" class="doc-page" contenteditable="true">Enter main case here...</div>
         </div>
         <div id="tab-content-view">
-            <h2 id="active-tab-title">Select a Block</h2>
-            <div id="active-tab-body" contenteditable="true">Content appears here...</div>
+            <div id="active-title" class="active-header" contenteditable="true">Select a Tab</div>
+            <div id="active-body" contenteditable="true" style="outline:none; min-height: 400px;">Block content...</div>
         </div>
         <div id="tab-sidebar">
             <div id="tab-list"></div>
@@ -111,67 +101,115 @@
     </div>
 
     <script>
-        // Tab Data
-        let tabs = [
-            { id: 1, title: "🇮🇷 Iran / Epic Fury", body: "US/Israel strikes prevent nuclear breakout..." },
-            { id: 2, title: "🇹🇼 Taiwan / Intent", body: "Article 8 of Anti-Secession Law makes invasion a legal mandate." }
-        ];
+        let tabs = [];
+        let currentTabId = null;
+
+        // --- BUTTON LOGIC ---
+
+        function newCase() {
+            if(confirm("Are you sure? This clears the main case window.")) {
+                document.getElementById('main-editor').innerHTML = "<h2>New Case</h2><p>Start typing...</p>";
+                toggleHome(false); 
+            }
+        }
+
+        function toggleHome(force) {
+            const home = document.getElementById('home-screen');
+            if (force === false) home.style.display = "none";
+            else home.style.display = (home.style.display === "flex") ? "none" : "flex";
+        }
+
+        function addTab() {
+            const id = Date.now();
+            const newTab = { id, title: "New Rebuttal", body: "Type evidence here..." };
+            tabs.push(newTab);
+            renderTabs();
+            selectTab(id);
+        }
+
+        function selectTab(id) {
+            currentTabId = id;
+            const tab = tabs.find(t => t.id === id);
+            document.getElementById('active-title').innerText = tab.title;
+            document.getElementById('active-body').innerHTML = tab.body;
+            renderTabs();
+        }
 
         function renderTabs() {
             const list = document.getElementById('tab-list');
             list.innerHTML = '';
             tabs.forEach(tab => {
-                const div = document.createElement('div');
-                div.className = 'tab-item';
-                div.innerText = tab.title;
-                div.onclick = () => {
-                    document.getElementById('active-tab-title').innerText = tab.title;
-                    document.getElementById('active-tab-body').innerHTML = tab.body;
-                };
-                list.appendChild(div);
+                const item = document.createElement('div');
+                item.className = `tab-item ${tab.id === currentTabId ? 'active' : ''}`;
+                item.onclick = () => selectTab(tab.id);
+                item.innerHTML = `<span>${tab.title}</span><span class="del-btn" onclick="deleteTab(event, ${tab.id})">×</span>`;
+                list.appendChild(item);
             });
         }
 
-        // SPEECH WINDOW LOGIC
-        function toggleSpeechWindow() {
-            const win = document.getElementById("speech-window");
+        function deleteTab(e, id) {
+            e.stopPropagation();
+            tabs = tabs.filter(t => t.id !== id);
+            if(currentTabId === id) {
+                currentTabId = null;
+                document.getElementById('active-title').innerText = "Select a Tab";
+                document.getElementById('active-body').innerHTML = "";
+            }
+            renderTabs();
+        }
+
+        function toggleSpeech() {
+            const win = document.getElementById('speech-window');
             win.style.display = (win.style.display === "flex") ? "none" : "flex";
         }
 
-        // DRAGGABLE SCRIPT
-        dragElement(document.getElementById("speech-window"));
+        // --- DRAG LOGIC (TOUCH & MOUSE) ---
+        const dragWin = document.getElementById("speech-window");
+        const dragHeader = document.getElementById("speech-header");
 
-        function dragElement(elmnt) {
-            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            if (document.getElementById(elmnt.id + "header")) {
-                document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+        let active = false;
+        let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
             }
+            if (e.target === dragHeader || dragHeader.contains(e.target)) active = true;
+        }
 
-            function dragMouseDown(e) {
+        function dragEnd() {
+            initialX = currentX;
+            initialY = currentY;
+            active = false;
+        }
+
+        function drag(e) {
+            if (active) {
                 e.preventDefault();
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
-            }
-
-            function elementDrag(e) {
-                e.preventDefault();
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-            }
-
-            function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                xOffset = currentX;
+                yOffset = currentY;
+                dragWin.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
             }
         }
 
-        renderTabs();
+        document.addEventListener("touchstart", dragStart, false);
+        document.addEventListener("touchend", dragEnd, false);
+        document.addEventListener("touchmove", drag, false);
+        document.addEventListener("mousedown", dragStart, false);
+        document.addEventListener("mouseup", dragEnd, false);
+        document.addEventListener("mousemove", drag, false);
+
     </script>
 </body>
 </html>
