@@ -29,14 +29,15 @@
 
         #about-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 3000; width: 320px; text-align: center; display: none; }
 
-        /* Draggable Sticky Note */
+        /* Draggable & Resizable Sticky Note */
         #sticky-note {
-            position: absolute; width: 250px; height: 250px; background: #fff9c4; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2); border-radius: 4px; display: none;
+            position: absolute; width: 280px; height: 280px; background: #fff9c4; 
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.25); border-radius: 4px; display: none;
             flex-direction: column; z-index: 2500; top: 100px; left: 100px; border: 1px solid #f0e68c;
+            overflow: hidden; resize: both; min-width: 150px; min-height: 150px;
         }
-        #sticky-header { padding: 8px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #857b26; }
-        #sticky-content { flex: 1; border: none; background: transparent; padding: 10px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.4; }
+        #sticky-header { padding: 10px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #857b26; touch-action: none; }
+        #sticky-content { flex: 1; border: none; background: transparent; padding: 12px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 14px; line-height: 1.4; }
 
         .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: 0.3s; }
         #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
@@ -80,7 +81,7 @@
 </div>
 
 <div id="sticky-note">
-    <div id="sticky-header"><span>FLOW NOTES</span><span onclick="toggleNotes()" style="cursor:pointer">×</span></div>
+    <div id="sticky-header"><span>FLOW NOTES</span><span onclick="toggleNotes()" style="cursor:pointer; padding: 0 5px;">×</span></div>
     <textarea id="sticky-content" placeholder="Drop flow notes here..." oninput="saveNotes()"></textarea>
 </div>
 
@@ -143,26 +144,54 @@
         localStorage.setItem('eduardos_notes', document.getElementById('sticky-content').value);
     }
 
-    // Draggable logic for Sticky Note
+    // UPDATED Draggable Logic (Mouse + Touch)
     const noteEl = document.getElementById("sticky-note");
     const headerEl = document.getElementById("sticky-header");
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    headerEl.onmousedown = dragMouseDown;
+    let activeDrag = false;
+    let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
 
-    function dragMouseDown(e) {
-        e.preventDefault();
-        pos3 = e.clientX; pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+    headerEl.addEventListener("touchstart", dragStart, false);
+    document.addEventListener("touchend", dragEnd, false);
+    document.addEventListener("touchmove", drag, false);
+
+    headerEl.addEventListener("mousedown", dragStart, false);
+    document.addEventListener("mouseup", dragEnd, false);
+    document.addEventListener("mousemove", drag, false);
+
+    function dragStart(e) {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+        if (e.target === headerEl || headerEl.contains(e.target)) activeDrag = true;
     }
-    function elementDrag(e) {
-        e.preventDefault();
-        pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
-        pos3 = e.clientX; pos4 = e.clientY;
-        noteEl.style.top = (noteEl.offsetTop - pos2) + "px";
-        noteEl.style.left = (noteEl.offsetLeft - pos1) + "px";
+
+    function dragEnd() {
+        initialX = currentX; initialY = currentY;
+        activeDrag = false;
     }
-    function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
+
+    function drag(e) {
+        if (activeDrag) {
+            e.preventDefault();
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+            xOffset = currentX; yOffset = currentY;
+            setTranslate(currentX, currentY, noteEl);
+        }
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+    }
 
     // --- STOPWATCH ---
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
@@ -251,7 +280,7 @@
 
     renderHome();
 
-    // Resizer logic
+    // Resizer logic for split screen
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
     const initResize = (e) => {
