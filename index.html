@@ -29,9 +29,16 @@
 
         #about-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 3000; width: 320px; text-align: center; display: none; }
 
-        .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: 0.3s; }
-        .glass-btn:hover { background: rgba(255, 255, 255, 0.35); transform: scale(1.02); }
+        /* Draggable Sticky Note */
+        #sticky-note {
+            position: absolute; width: 250px; height: 250px; background: #fff9c4; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2); border-radius: 4px; display: none;
+            flex-direction: column; z-index: 2500; top: 100px; left: 100px; border: 1px solid #f0e68c;
+        }
+        #sticky-header { padding: 8px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #857b26; }
+        #sticky-content { flex: 1; border: none; background: transparent; padding: 10px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.4; }
 
+        .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: 0.3s; }
         #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
         .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
         .case-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.4s; color: white; }
@@ -49,7 +56,6 @@
         
         .action-popup { position: absolute; top: 45px; right: 15px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; width: 160px; z-index: 200; overflow: hidden; border: 1px solid #eee; }
         .action-popup button { border: none; padding: 12px 16px; text-align: left; background: none; cursor: pointer; font-size: 13px; color: #1c1e21; font-weight: 500; }
-        .action-popup button:hover { background: #f8f9fa; }
         
         #speech-win { position: absolute; width: 420px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 2000; top: 80px; left: 30%; overflow: hidden; border: 1px solid #e2e8f0; }
         #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
@@ -69,7 +75,13 @@
         <button class="stopwatch-btn" onclick="resetTimer()">RESET</button>
     </div>
     <div style="flex:1"></div>
+    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; margin-right: 5px; background: #fff9c4; border-color: #f0e68c;">📝 Quick Notes</button>
     <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ Add Rebuttal Block</button>
+</div>
+
+<div id="sticky-note">
+    <div id="sticky-header"><span>FLOW NOTES</span><span onclick="toggleNotes()" style="cursor:pointer">×</span></div>
+    <textarea id="sticky-content" placeholder="Drop flow notes here..." oninput="saveNotes()"></textarea>
 </div>
 
 <div id="about-box">
@@ -121,6 +133,37 @@
     let currentCaseIdx = null;
     let currentTabIdx = null;
 
+    // --- NOTES LOGIC ---
+    function toggleNotes() {
+        const note = document.getElementById('sticky-note');
+        note.style.display = note.style.display === 'flex' ? 'none' : 'flex';
+        document.getElementById('sticky-content').value = localStorage.getItem('eduardos_notes') || '';
+    }
+    function saveNotes() {
+        localStorage.setItem('eduardos_notes', document.getElementById('sticky-content').value);
+    }
+
+    // Draggable logic for Sticky Note
+    const noteEl = document.getElementById("sticky-note");
+    const headerEl = document.getElementById("sticky-header");
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    headerEl.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e.preventDefault();
+        pos3 = e.clientX; pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+    function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+        pos3 = e.clientX; pos4 = e.clientY;
+        noteEl.style.top = (noteEl.offsetTop - pos2) + "px";
+        noteEl.style.left = (noteEl.offsetLeft - pos1) + "px";
+    }
+    function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
+
     // --- STOPWATCH ---
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
     function toggleTimer() {
@@ -142,6 +185,7 @@
         document.getElementById('home-screen').style.display = "flex";
         document.getElementById('workspace').style.display = "none";
         document.getElementById('add-tab-btn').style.display = "none";
+        document.getElementById('notes-btn').style.display = "none";
         const grid = document.getElementById('case-grid'); grid.innerHTML = '';
         cases.forEach((c, i) => {
             const card = document.createElement('div'); card.className = 'case-card';
@@ -177,28 +221,22 @@
         reader.onload = function(e) {
             try {
                 const importedCase = JSON.parse(e.target.result);
-                // Basic validation
                 if (importedCase.name && importedCase.mainContent) {
                     cases.push(importedCase);
-                    save();
-                    renderHome();
+                    save(); renderHome();
                     alert("Case imported successfully!");
-                } else {
-                    alert("Invalid case file format.");
                 }
-            } catch (err) {
-                alert("Error reading file.");
-            }
+            } catch (err) { alert("Error reading file."); }
         };
         reader.readAsText(file);
-        event.target.value = ''; // Reset input
+        event.target.value = '';
     }
 
     function toggleMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none'); document.getElementById(`menu-${i}`).style.display = 'flex'; }
     window.onclick = () => document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none');
     function toggleAbout() { const b = document.getElementById('about-box'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
     function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>"+n+"</h1>", tabs: [] }); save(); renderHome(); } }
-    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
+    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('notes-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
     function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Content..." }); save(); renderTabs(); selectTab(cases[currentCaseIdx].tabs.length - 1); }
     function selectTab(i) { currentTabIdx = i; const t = cases[currentCaseIdx].tabs[i]; document.getElementById('active-title').innerText = t.title; document.getElementById('active-body').innerHTML = t.body; renderTabs(); }
     function renderTabs() { const list = document.getElementById('tab-list'); list.innerHTML = ''; cases[currentCaseIdx].tabs.forEach((t, i) => { const d = document.createElement('div'); d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`; d.onclick = () => selectTab(i); d.innerText = t.title; list.appendChild(d); }); }
