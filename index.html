@@ -27,6 +27,7 @@
         #timer-display { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 90px; text-align: center; }
         .stopwatch-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 800; padding: 2px 6px; }
 
+        /* Sticky Note Styles */
         #sticky-note {
             position: absolute; width: 280px; height: 280px; background: #fff9c4; 
             box-shadow: 5px 5px 20px rgba(0,0,0,0.25); border-radius: 4px; display: none;
@@ -37,7 +38,10 @@
         #sticky-content { flex: 1; border: none; background: transparent; padding: 12px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 14px; }
 
         .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; }
-        #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; }
+        
+        #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
+        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
+        .case-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.4s; color: white; }
         
         #workspace { display: flex; flex: 1; overflow: hidden; background: #fff; }
         #main-section { width: 38%; min-width: 250px; padding: 20px; background: #eaeff2; overflow-y: auto; }
@@ -51,15 +55,17 @@
         
         .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; }
         
-        /* Tab Styles with Menu */
         .tab-item { position: relative; padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .tab-item.active { border-color: var(--accent); background: #f0f4f8; font-weight: 700; }
         .tab-item.is-flow { background: #fff9c4; border-color: #f0e68c; }
         .tab-dots { padding: 0 5px; color: #999; cursor: pointer; }
 
-        .tab-menu { position: absolute; top: 40px; right: 10px; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 3000; display: none; flex-direction: column; overflow: hidden; }
-        .tab-menu button { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 12px; }
-        .tab-menu button:hover { background: #f5f5f5; }
+        .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; }
+        .action-popup { top: 45px; right: 15px; width: 160px; }
+        .tab-menu { top: 40px; right: 10px; }
+        
+        button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 12px; color: var(--text); }
+        button.menu-btn:hover { background: #f5f5f5; }
 
         #about-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 3000; width: 320px; text-align: center; display: none; }
     </style>
@@ -86,8 +92,12 @@
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; color: white;">
-        <h1 style="font-weight: 700;">Strategic Case Files</h1>
-        <button class="glass-btn" onclick="createNewCase()">+ New Case</button>
+        <h1 style="font-weight: 700; font-size: 32px;">Strategic Case Files</h1>
+        <div style="display: flex; gap: 15px;">
+            <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importCase(event)">
+            <button class="glass-btn" onclick="document.getElementById('import-file').click()">📂 Import Case</button>
+            <button class="glass-btn" onclick="createNewCase()">+ New Case</button>
+        </div>
     </div>
     <div class="case-grid" id="case-grid" style="max-width: 1200px; margin: 30px auto; width: 100%;"></div>
 </div>
@@ -116,7 +126,62 @@
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
     let currentCaseIdx = null, currentTabIdx = null;
 
-    // --- DRAG TO TAB LOGIC ---
+    // --- CASE & HOME LOGIC ---
+    function renderHome() {
+        document.getElementById('home-screen').style.display = "flex";
+        document.getElementById('workspace').style.display = "none";
+        document.getElementById('notes-btn').style.display = "none";
+        document.getElementById('add-tab-btn').style.display = "none";
+        const grid = document.getElementById('case-grid'); grid.innerHTML = '';
+        cases.forEach((c, i) => {
+            const card = document.createElement('div'); card.className = 'case-card';
+            card.onclick = () => openCase(i);
+            card.innerHTML = `
+                <div style="font-weight:700; font-size: 20px;">${c.name}</div>
+                <div style="position:absolute; top:20px; right:20px; font-size:20px;" onclick="toggleMenu(event, ${i})">⋮</div>
+                <div id="menu-${i}" class="action-popup">
+                    <button class="menu-btn" onclick="saveToFile(event, ${i})">💾 Save to File</button>
+                    <button class="menu-btn" onclick="renameCase(event, ${i})">✏️ Rename</button>
+                    <button class="menu-btn" style="color:#e53e3e;" onclick="deleteCase(event, ${i})">🗑️ Delete</button>
+                </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function toggleMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); document.getElementById(`menu-${i}`).style.display = 'flex'; }
+    window.onclick = () => document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none');
+
+    function saveToFile(e, i) {
+        e.stopPropagation();
+        const data = JSON.stringify(cases[i], null, 2);
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${cases[i].name.replace(/\s+/g, '_')}_EduardOS.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importCase(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedCase = JSON.parse(e.target.result);
+                if (importedCase.name && importedCase.mainContent) {
+                    cases.push(importedCase);
+                    save(); renderHome();
+                    alert("Case imported!");
+                }
+            } catch (err) { alert("Error reading file."); }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // --- NOTES & DRAG LOGIC ---
     const noteEl = document.getElementById("sticky-note");
     const sidebarEl = document.getElementById("sidebar");
     let activeDrag = false, xOffset = 0, yOffset = 0, initialX, initialY;
@@ -125,49 +190,35 @@
         noteEl.style.display = noteEl.style.display === 'flex' ? 'none' : 'flex';
         document.getElementById('sticky-content').value = localStorage.getItem('eduardos_notes') || '';
     }
-
     function saveNotes() { localStorage.setItem('eduardos_notes', document.getElementById('sticky-content').value); }
 
-    // Unified Drag Logic
     const startDrag = (e) => {
         const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         initialX = clientX - xOffset; initialY = clientY - yOffset;
         if (e.target.closest('#sticky-header')) activeDrag = true;
     };
-
     const doDrag = (e) => {
         if (!activeDrag) return;
         const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         xOffset = clientX - initialX; yOffset = clientY - initialY;
         noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
-
-        // Collision detection for sidebar
         const rect = sidebarEl.getBoundingClientRect();
-        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
-            sidebarEl.classList.add('drag-over');
-        } else {
-            sidebarEl.classList.remove('drag-over');
-        }
+        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) sidebarEl.classList.add('drag-over');
+        else sidebarEl.classList.remove('drag-over');
     };
-
     const endDrag = (e) => {
         if (!activeDrag) return;
         const rect = sidebarEl.getBoundingClientRect();
         const clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
         const clientY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
-
-        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
-            convertToTab();
-        }
-        activeDrag = false;
-        sidebarEl.classList.remove('drag-over');
+        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) convertToTab();
+        activeDrag = false; sidebarEl.classList.remove('drag-over');
     };
 
     function convertToTab() {
         const content = document.getElementById('sticky-content').value;
-        if (!content && !confirm("Empty note. Create tab anyway?")) return;
         cases[currentCaseIdx].tabs.push({ title: "Flow Note", body: content, isFlow: true });
         localStorage.setItem('eduardos_notes', '');
         document.getElementById('sticky-content').value = '';
@@ -175,14 +226,10 @@
         save(); renderTabs();
     }
 
-    document.addEventListener("mousedown", startDrag);
-    document.addEventListener("mousemove", doDrag);
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchstart", startDrag);
-    document.addEventListener("touchmove", doDrag);
-    document.addEventListener("touchend", endDrag);
+    document.addEventListener("mousedown", startDrag); document.addEventListener("mousemove", doDrag); document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchstart", startDrag); document.addEventListener("touchmove", doDrag); document.addEventListener("touchend", endDrag);
 
-    // --- TAB MANAGEMENT ---
+    // --- TAB LOGIC ---
     function renderTabs() {
         const list = document.getElementById('tab-list');
         list.innerHTML = '';
@@ -194,68 +241,32 @@
                 <span>${t.title}</span>
                 <span class="tab-dots" onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
-                    ${t.isFlow ? `<button onclick="tabify(event, ${i})">⤴ Tabify (Pop out)</button>` : ''}
-                    <button style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
-                </div>
-            `;
+                    ${t.isFlow ? `<button class="menu-btn" onclick="tabify(event, ${i})">⤴ Tabify (Pop out)</button>` : ''}
+                    <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
+                </div>`;
             list.appendChild(d);
         });
     }
 
-    function toggleTabMenu(e, i) {
-        e.stopPropagation();
-        const menu = document.getElementById(`tab-menu-${i}`);
-        const isVisible = menu.style.display === 'flex';
-        document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none');
-        menu.style.display = isVisible ? 'none' : 'flex';
-    }
+    function toggleTabMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); document.getElementById(`tab-menu-${i}`).style.display = 'flex'; }
+    function deleteTab(e, i) { e.stopPropagation(); if (confirm("Delete tab?")) { cases[currentCaseIdx].tabs.splice(i, 1); save(); renderTabs(); } }
+    function tabify(e, i) { e.stopPropagation(); const tab = cases[currentCaseIdx].tabs[i]; document.getElementById('sticky-content').value = tab.body; saveNotes(); cases[currentCaseIdx].tabs.splice(i, 1); noteEl.style.display = 'flex'; save(); renderTabs(); }
 
-    function deleteTab(e, i) {
-        e.stopPropagation();
-        if (confirm("Delete this tab?")) {
-            cases[currentCaseIdx].tabs.splice(i, 1);
-            if (currentTabIdx === i) currentTabIdx = null;
-            save(); renderTabs();
-        }
-    }
-
-    function tabify(e, i) {
-        e.stopPropagation();
-        const tab = cases[currentCaseIdx].tabs[i];
-        document.getElementById('sticky-content').value = tab.body;
-        saveNotes();
-        cases[currentCaseIdx].tabs.splice(i, 1);
-        noteEl.style.display = 'flex';
-        save(); renderTabs();
-    }
-
-    // --- BASIC SYSTEM (RETAINED) ---
-    function renderHome() {
-        document.getElementById('home-screen').style.display = "flex";
-        document.getElementById('workspace').style.display = "none";
-        document.getElementById('notes-btn').style.display = "none";
-        document.getElementById('add-tab-btn').style.display = "none";
-        const grid = document.getElementById('case-grid'); grid.innerHTML = '';
-        cases.forEach((c, i) => {
-            const card = document.createElement('div'); card.className = 'case-card';
-            card.onclick = () => openCase(i);
-            card.innerHTML = `<div style="font-weight:700; font-size: 20px;">${c.name}</div>`;
-            grid.appendChild(card);
-        });
-    }
+    // --- SHARED UTILS ---
     function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>"+n+"</h1>", tabs: [] }); save(); renderHome(); } }
     function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('notes-btn').style.display = "block"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
     function selectTab(i) { currentTabIdx = i; const t = cases[currentCaseIdx].tabs[i]; document.getElementById('active-title').innerText = t.title; document.getElementById('active-body').innerHTML = t.body; renderTabs(); }
-    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "Content here..." }); save(); renderTabs(); }
+    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "Content..." }); save(); renderTabs(); }
     function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
     function showHome() { renderHome(); }
     function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
     function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
     function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
     function toggleAbout() { const b = document.getElementById('about-box'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
-    window.onclick = () => document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none');
+    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete?")) { cases.splice(i,1); save(); renderHome(); } }
+    function renameCase(e, i) { e.stopPropagation(); const n = prompt("New name:", cases[i].name); if(n) { cases[i].name=n; save(); renderHome(); } }
 
-    // Stopwatch
+    // Stopwatch logic
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
     function toggleTimer() {
         if (!timerRunning) {
