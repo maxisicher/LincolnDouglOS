@@ -3,62 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DebateOS - Strategic Dashboard</title>
+    <title>DebateOS</title>
     <style>
         :root { --accent: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --text: #202124; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+        body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
         
         /* Toolbar */
         #toolbar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; background: white; gap: 10px; z-index: 100; flex-shrink: 0; }
+        
+        /* Logo Placeholder */
+        .logo-box { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--accent); margin-right: 15px; border-right: 1px solid var(--border); padding-right: 15px; height: 30px; }
+        .logo-circle { width: 24px; height: 24px; background: var(--accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
+
         .btn { padding: 8px 12px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: 500; }
         .btn:hover { background: #f8f9fa; }
 
         /* Home Screen */
         #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: white; z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
-        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
-        .case-card { border: 1px solid var(--border); border-radius: 8px; padding: 20px; cursor: pointer; position: relative; background: white; transition: all 0.2s ease; }
-        .case-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .menu-dots { position: absolute; top: 10px; right: 10px; font-weight: bold; padding: 5px; color: #5f6368; }
-
-        /* Workspace with Resizable Divider */
-        #workspace { display: flex; flex: 1; overflow: hidden; width: 100%; position: relative; }
+        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; }
         
-        #main-section { width: 35%; min-width: 200px; max-width: 70%; padding: 20px; background: var(--bg); overflow-y: auto; box-sizing: border-box; }
+        .case-card { border: 1px solid var(--border); border-radius: 8px; padding: 20px; cursor: pointer; position: relative; background: white; transition: 0.2s; }
+        .case-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
-        /* THE DRAG DIVIDER */
-        #resizer { 
-            width: 8px; 
-            cursor: col-resize; 
-            background: var(--border); 
-            transition: background 0.2s; 
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #resizer:hover, #resizer.active { background: var(--accent); }
-        #resizer::after { content: "||"; color: #999; font-size: 10px; font-weight: bold; }
+        /* Small Menu Box instead of prompts */
+        .case-menu-btn { position: absolute; top: 10px; right: 10px; font-size: 18px; color: #5f6368; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .case-menu-btn:hover { background: #f1f3f4; }
+        
+        .action-popup { position: absolute; top: 40px; right: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 200; width: 120px; overflow: hidden; }
+        .action-popup button { border: none; background: none; padding: 10px; text-align: left; cursor: pointer; font-size: 13px; }
+        .action-popup button:hover { background: #f1f3f4; }
+        .delete-btn { color: #d93025; }
 
-        #right-zone { flex: 1; display: flex; overflow: hidden; min-width: 300px; }
+        /* Workspace & Resizer */
+        #workspace { display: flex; flex: 1; overflow: hidden; width: 100%; }
+        #main-section { width: 35%; min-width: 250px; padding: 20px; background: var(--bg); overflow-y: auto; }
+        #resizer { width: 6px; cursor: col-resize; background: var(--border); transition: 0.2s; z-index: 10; }
+        #resizer:hover { background: var(--accent); }
+        #right-zone { flex: 1; display: flex; overflow: hidden; }
         #tab-view { flex: 1; padding: 30px; overflow-y: auto; background: white; }
-        #sidebar { width: 250px; flex-shrink: 0; border-left: 1px solid var(--border); background: #f8f9fa; overflow-y: auto; }
+        #sidebar { width: 250px; border-left: 1px solid var(--border); background: #f8f9fa; overflow-y: auto; }
 
-        .doc { background: white; min-height: 100%; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); outline: none; line-height: 1.5; }
-        .tab-item { padding: 12px 15px; margin: 8px; background: white; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px; }
-        .tab-item.active { border-color: var(--accent); background: #e8f0fe; font-weight: 500; }
+        .doc { background: white; min-height: 100%; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); outline: none; }
+        .tab-item { padding: 12px; margin: 8px; background: white; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .tab-item.active { border-color: var(--accent); background: #e8f0fe; }
 
-        /* Movable Speech Window */
-        #speech-win { position: absolute; width: 400px; background: white; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); display: none; flex-direction: column; z-index: 1000; top: 70px; left: 35%; border: 1px solid #ccc; overflow: hidden; }
+        /* Speech Window */
+        #speech-win { position: absolute; width: 380px; background: white; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; top: 70px; left: 35%; border: 1px solid #ccc; }
         #speech-head { padding: 12px; background: var(--accent); color: white; cursor: move; display: flex; justify-content: space-between; touch-action: none; font-size: 14px; font-weight: bold; }
-        .timer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .timer-table td { padding: 8px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div id="toolbar">
+    <div class="logo-box">
+        <div class="logo-circle">D</div>
+        <span>DebateOS</span>
+    </div>
+
     <button class="btn" onclick="showHome()">Home</button>
-    <button class="btn" onclick="createNewCase()" id="new-case-btn" style="display:none;">New Case File</button>
     <button class="btn" onclick="toggleSpeech()">Speech Times</button>
     <div style="flex:1"></div>
     <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none; color: var(--accent);">+ Add Rebuttal Tab</button>
@@ -66,97 +68,79 @@
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; width: 100%;">
-        <h2 style="font-weight: 400; color: #3c4043;">Strategic Case Files</h2>
-        <button class="btn" onclick="createNewCase()" style="background: var(--accent); color: white; border: none; padding: 10px 20px;">+ Create Blank Case</button>
+        <h2 style="font-weight: 400;">My Strategic Cases</h2>
+        <button class="btn" onclick="createNewCase()" style="background: var(--accent); color: white; border: none; padding: 10px 20px;">+ New Case</button>
     </div>
     <div class="case-grid" id="case-grid" style="max-width: 1000px; margin: 20px auto; width: 100%;"></div>
 </div>
 
 <div id="speech-win">
-    <div id="speech-head"><span>Lincoln-Douglas Speaking Order</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
-    <div style="padding:15px;">
-        <table class="timer-table">
-            <tr><td>Affirmative Constructive (1AC)</td><td>6 Min</td></tr>
-            <tr><td>Cross-Examination of Aff</td><td>3 Min</td></tr>
-            <tr><td>Negative Constructive (1NC)</td><td>7 Min</td></tr>
-            <tr><td>Cross-Examination of Neg</td><td>3 Min</td></tr>
-            <tr><td>First Affirmative Rebuttal (1AR)</td><td>4 Min</td></tr>
-            <tr><td>Negative Rebuttal (2NR)</td><td>6 Min</td></tr>
-            <tr><td>Second Affirmative Rebuttal (2AR)</td><td>3 Min</td></tr>
+    <div id="speech-head"><span>LD Speaking Order</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
+    <div style="padding:15px; font-size:12px;">
+        <table style="width:100%; border-collapse: collapse;">
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">Affirmative Constructive</td><td>6m</td></tr>
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">Cross-Ex of Aff</td><td>3m</td></tr>
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">Negative Constructive</td><td>7m</td></tr>
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">Cross-Ex of Neg</td><td>3m</td></tr>
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">1st Aff Rebuttal</td><td>4m</td></tr>
+            <tr><td style="padding:5px; border-bottom:1px solid #eee;">Negative Rebuttal</td><td>6m</td></tr>
+            <tr><td style="padding:5px;">2nd Aff Rebuttal</td><td>3m</td></tr>
         </table>
     </div>
 </div>
 
 <div id="workspace" style="display:none;">
-    <div id="main-section">
-        <div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div>
-    </div>
-    
+    <div id="main-section"><div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div></div>
     <div id="resizer"></div>
-
     <div id="right-zone">
         <div id="tab-view">
-            <div id="active-title" style="font-size:28px; font-weight:400; margin-bottom:20px; outline:none;" contenteditable="true" oninput="syncTabTitle()"></div>
-            <div id="active-body" style="outline:none; font-size: 16px; line-height:1.6;" contenteditable="true" oninput="syncTabBody()"></div>
+            <div id="active-title" style="font-size:28px; margin-bottom:15px; outline:none;" contenteditable="true" oninput="syncTabTitle()"></div>
+            <div id="active-body" style="outline:none; line-height:1.6; font-size:16px;" contenteditable="true" oninput="syncTabBody()"></div>
         </div>
         <div id="sidebar">
-            <div style="padding: 15px; font-size: 11px; color: #70757a; font-weight: bold; letter-spacing: 0.8px;">REBUTTAL BLOCKS</div>
+            <div style="padding:15px; font-size:11px; color:#70757a; font-weight:bold;">REBUTTAL BLOCKS</div>
             <div id="tab-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    let cases = JSON.parse(localStorage.getItem('debateOS_data')) || [];
+    let cases = JSON.parse(localStorage.getItem('debateOS_v2')) || [];
     let currentCaseIdx = null;
     let currentTabIdx = null;
 
-    // --- RESIZER LOGIC ---
-    const resizer = document.getElementById('resizer');
-    const leftSide = document.getElementById('main-section');
-    
-    resizer.addEventListener('mousedown', initResize);
-    resizer.addEventListener('touchstart', initResize, {passive: false});
-
-    function initResize(e) {
-        e.preventDefault();
-        resizer.classList.add('active');
-        window.addEventListener('mousemove', resize);
-        window.addEventListener('mouseup', stopResize);
-        window.addEventListener('touchmove', resize);
-        window.addEventListener('touchend', stopResize);
-    }
-
-    function resize(e) {
-        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        const width = (clientX / window.innerWidth) * 100;
-        if (width > 15 && width < 75) {
-            leftSide.style.width = width + '%';
-        }
-    }
-
-    function stopResize() {
-        resizer.classList.remove('active');
-        window.removeEventListener('mousemove', resize);
-        window.removeEventListener('touchmove', resize);
-    }
-
-    // --- CORE APP LOGIC ---
+    // --- HOME SCREEN & ACTION POPUP ---
     function renderHome() {
         document.getElementById('home-screen').style.display = "flex";
         document.getElementById('workspace').style.display = "none";
         document.getElementById('add-tab-btn').style.display = "none";
-        document.getElementById('new-case-btn').style.display = "none";
         const grid = document.getElementById('case-grid');
         grid.innerHTML = '';
         cases.forEach((c, i) => {
             const card = document.createElement('div');
             card.className = 'case-card';
             card.onclick = () => openCase(i);
-            card.innerHTML = `<div style="font-weight:500;">${c.name}</div><div class="menu-dots" onclick="event.stopPropagation(); showMenu(${i})">⋮</div>`;
+            card.innerHTML = `
+                <div style="font-weight:500;">${c.name}</div>
+                <div class="case-menu-btn" onclick="toggleCardMenu(event, ${i})">⋮</div>
+                <div id="menu-${i}" class="action-popup">
+                    <button onclick="renameCase(event, ${i})">Rename</button>
+                    <button class="delete-btn" onclick="deleteCase(event, ${i})">Delete</button>
+                </div>
+            `;
             grid.appendChild(card);
         });
     }
+
+    function toggleCardMenu(e, i) {
+        e.stopPropagation();
+        const menus = document.querySelectorAll('.action-popup');
+        menus.forEach(m => m.style.display = 'none');
+        document.getElementById(`menu-${i}`).style.display = 'flex';
+    }
+
+    // Hide menus on click outside
+    window.onclick = () => document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none');
 
     function createNewCase() {
         const name = prompt("Case Name:");
@@ -165,18 +149,43 @@
         save(); renderHome();
     }
 
+    function deleteCase(e, i) {
+        e.stopPropagation();
+        if(confirm("Delete this case forever?")) cases.splice(i, 1);
+        save(); renderHome();
+    }
+
+    function renameCase(e, i) {
+        e.stopPropagation();
+        const newName = prompt("New Name:", cases[i].name);
+        if(newName) cases[i].name = newName;
+        save(); renderHome();
+    }
+
     function openCase(i) {
         currentCaseIdx = i;
         document.getElementById('home-screen').style.display = "none";
         document.getElementById('workspace').style.display = "flex";
         document.getElementById('add-tab-btn').style.display = "block";
-        document.getElementById('new-case-btn').style.display = "block";
         document.getElementById('main-editor').innerHTML = cases[i].mainContent;
         renderTabs();
     }
 
+    // --- RESIZER LOGIC ---
+    const resizer = document.getElementById('resizer');
+    const leftSide = document.getElementById('main-section');
+    resizer.addEventListener('mousedown', (e) => {
+        const resize = (ev) => {
+            let width = (ev.clientX / window.innerWidth) * 100;
+            if (width > 20 && width < 70) leftSide.style.width = width + '%';
+        };
+        window.addEventListener('mousemove', resize);
+        window.addEventListener('mouseup', () => window.removeEventListener('mousemove', resize));
+    });
+
+    // --- TABS & SYNC ---
     function addTab() {
-        cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Evidence..." });
+        cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Warrant/Evidence here..." });
         save(); renderTabs(); selectTab(cases[currentCaseIdx].tabs.length - 1);
     }
 
@@ -188,6 +197,12 @@
         renderTabs();
     }
 
+    function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
+    function syncTabTitle() { 
+        cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; 
+        save(); renderTabs(); 
+    }
+    function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
     function renderTabs() {
         const list = document.getElementById('tab-list');
         list.innerHTML = '';
@@ -200,13 +215,9 @@
         });
     }
 
-    function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
-    function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
-    function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
-    function save() { localStorage.setItem('debateOS_data', JSON.stringify(cases)); }
+    function save() { localStorage.setItem('debateOS_v2', JSON.stringify(cases)); }
     function showHome() { renderHome(); }
     function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = s.style.display === 'flex' ? 'none' : 'flex'; }
-    function showMenu(i) { const action = prompt("Type 'delete' or 'rename':"); if(action==='delete') cases.splice(i,1); if(action==='rename') cases[i].name=prompt("New name:"); save(); renderHome(); }
 
     renderHome();
 </script>
