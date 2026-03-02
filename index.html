@@ -13,6 +13,7 @@
             --font-main: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --toolbar-bg: white;
             --block-bg: white;
+            --logo-text: #002347;
         }
 
         body.dark-mode {
@@ -21,6 +22,7 @@
             --border: #333;
             --toolbar-bg: #1a1a1a;
             --block-bg: #2a2a2a;
+            --logo-text: #ffffff;
             background-color: #121212;
         }
 
@@ -38,8 +40,9 @@
         body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); transition: background 0.3s; }
         
         #toolbar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; background: var(--toolbar-bg); gap: 10px; z-index: 100; flex-shrink: 0; }
-        .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); border-right: 1px solid var(--border); padding-right: 15px; cursor: pointer; }
-        .logo-circle { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: serif; }
+        
+        .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--logo-text); border-right: 1px solid var(--border); padding-right: 15px; cursor: pointer; transition: color 0.3s; }
+        .logo-circle { width: 28px; height: 28px; background: var(--logo-text); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--toolbar-bg); font-family: serif; transition: background 0.3s, color 0.3s; }
 
         .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; color: var(--accent); }
         .btn:hover { background: #f0f4f8; }
@@ -245,19 +248,47 @@
     function renderTabs() {
         const list = document.getElementById('tab-list'); list.innerHTML = '';
         const search = document.getElementById('sidebar-search').value.toLowerCase();
+        const isDark = document.body.classList.contains('dark-mode');
+
         cases[currentCaseIdx].tabs.forEach((t, i) => {
             if (search && !t.title.toLowerCase().includes(search)) return;
             const d = document.createElement('div');
             d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`;
-            if (!document.body.classList.contains('dark-mode')) { d.style.background = t.color || 'white'; }
+            
+            // Apply color coding
+            if (t.color && t.color !== 'white') {
+                d.style.backgroundColor = isDark ? t.color + '44' : t.color;
+                d.style.borderColor = t.color;
+            }
+
             d.onclick = () => selectTab(i);
             d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
+                    <button class="menu-btn" onclick="setColor(event, ${i})">Set Color</button>
                     <button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>
                     <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
                 </div>`;
             list.appendChild(d);
         });
+    }
+
+    function setColor(e, i) {
+        e.stopPropagation();
+        const colors = { "Default": "white", "Green": "#d4edda", "Blue": "#d1ecf1", "Red": "#f8d7da", "Yellow": "#fff3cd" };
+        const choice = prompt("Choose color: Default, Green, Blue, Red, Yellow", "Green");
+        if (colors[choice]) {
+            cases[currentCaseIdx].tabs[i].color = colors[choice];
+            save(); renderTabs();
+        }
+    }
+
+    function deleteTab(e, i) {
+        e.stopPropagation();
+        if(confirm("Delete this block?")) {
+            cases[currentCaseIdx].tabs.splice(i, 1);
+            if(currentTabIdx === i) currentTabIdx = null;
+            save(); renderTabs();
+        }
     }
 
     function tabify(e, i) { e.stopPropagation(); const t = cases[currentCaseIdx].tabs[i]; document.getElementById('sticky-content').value = t.body; cases[currentCaseIdx].tabs.splice(i, 1); noteEl.style.display = 'flex'; save(); renderTabs(); }
