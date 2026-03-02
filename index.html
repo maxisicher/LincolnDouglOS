@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EduardOS</title>
+    <title>EduardOS | Debate Case Manager</title>
     <style>
         :root { 
             --accent: #002347; 
@@ -26,61 +26,63 @@
         #timer-display { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 90px; text-align: center; }
         .stopwatch-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 800; padding: 2px 6px; }
 
-        /* HOME SCREEN WITH IMAGE BACKGROUND */
+        /* HOME SCREEN */
         #home-screen { 
             position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); 
-            background: linear-gradient(rgba(0, 35, 71, 0.6), rgba(0, 35, 71, 0.6)), url('background.jpg'); /* REPLACE background.jpg WITH YOUR IMAGE */
+            background: linear-gradient(rgba(0, 35, 71, 0.4), rgba(0, 35, 71, 0.6)), url('https://image2url.com/r2/default/images/1772485982259-44630081-12dd-4d2c-8975-d889f689d625.png');
             background-size: cover; background-position: center;
             z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; 
         }
 
         .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
-        .case-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.4s; color: white; }
-        .case-card:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-5px); }
+        .case-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.3s; color: white; }
+        .case-card:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-3px); }
 
         #workspace { display: flex; flex: 1; overflow: hidden; background: #fff; }
-        #main-section { width: 40%; min-width: 300px; padding: 20px; background: #eaeff2; overflow-y: auto; box-sizing: border-box; }
+        #main-section { width: 40%; min-width: 250px; padding: 20px; background: #eaeff2; overflow-y: auto; box-sizing: border-box; }
         
-        /* THE GUTTER RESIZER */
-        #resizer { width: 8px; cursor: col-resize; z-index: 1000; background: #dee2e6; transition: 0.2s; }
-        #resizer:hover { background: var(--accent); opacity: 0.5; }
+        #resizer { width: 10px; cursor: col-resize; z-index: 1000; background: #dee2e6; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        #resizer:hover { background: var(--accent); opacity: 0.3; }
 
         #right-zone { flex: 1; display: flex; overflow: hidden; }
         #tab-view { flex: 1; padding: 45px; overflow-y: auto; background: white; }
-        #sidebar { width: 300px; border-left: 1px solid var(--border); background: #fdfdfd; display: flex; flex-direction: column; }
+        #sidebar { width: 320px; border-left: 1px solid var(--border); background: #fdfdfd; display: flex; flex-direction: column; }
         
         .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; }
         
-        /* SEARCH & TABS */
-        .search-container { padding: 15px 10px 5px; background: #fdfdfd; }
-        #sidebar-search { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box;}
-        #tab-list { flex: 1; overflow-y: auto; }
-        .tab-item { position: relative; padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .tab-item.active { border-color: var(--accent); font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .search-container { padding: 15px; border-bottom: 1px solid #eee; }
+        #sidebar-search { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box;}
+        
+        #tab-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+        .tab-item { position: relative; padding: 14px; margin: 5px 15px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .tab-item.active { border-color: var(--accent); border-width: 2px; font-weight: 700; }
 
-        .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; }
-        .action-popup { top: 45px; right: 15px; width: 160px; }
-        .tab-menu { top: 40px; right: 10px; width: 140px; }
+        .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; top: 40px; right: 10px; width: 160px; }
         .color-picker-row { display: flex; padding: 8px; gap: 8px; border-top: 1px solid #eee; justify-content: center; background: #fafafa; }
         .swatch { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); }
-        button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 13px; width: 100%; }
+        
+        button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 13px; width: 100%; color: var(--text); }
         button.menu-btn:hover { background: #f5f5f5; }
 
         /* STICKY NOTES */
-        #sticky-note { position: absolute; width: 280px; height: 280px; background: #fff9c4; box-shadow: 5px 5px 20px rgba(0,0,0,0.25); border-radius: 4px; display: none; flex-direction: column; z-index: 2500; top: 100px; left: 100px; border: 1px solid #f0e68c; overflow: hidden; resize: both; }
-        #sticky-header { padding: 10px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #857b26; }
-        #sticky-content { flex: 1; border: none; background: transparent; padding: 12px; resize: none; outline: none; font-family: monospace; }
-        
-        #speech-win { position: fixed; width: 400px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 5000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; }
-        #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
+        #sticky-note { position: absolute; width: 300px; height: 300px; background: #fff9c4; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 4px; display: none; flex-direction: column; z-index: 2500; top: 100px; left: 100px; border: 1px solid #f0e68c; overflow: hidden; resize: both; }
+        #sticky-header { padding: 12px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #857b26; user-select: none; }
+        #sticky-content { flex: 1; border: none; background: transparent; padding: 15px; resize: none; outline: none; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.4; }
+
+        /* SPEAKER ORDER MODAL */
+        #speech-win { position: fixed; width: 450px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 5000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; border: 1px solid var(--border); }
+        #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; align-items: center; }
         .speech-table { width:100%; font-size:14px; border-collapse: collapse; }
+        .speech-table th { background: #f8f9fa; text-align: left; padding: 12px 15px; border-bottom: 2px solid #dee2e6; color: var(--accent); font-weight: 800; }
         .speech-table td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        .speech-table tr:last-child td { border-bottom: none; }
+        .time-col { font-family: monospace; font-weight: bold; color: #d63384; text-align: right; }
     </style>
 </head>
 <body>
 
 <div id="toolbar">
-    <div class="logo-box" onclick="toggleAbout()"><div class="logo-circle">E</div><span>EduardOS</span></div>
+    <div class="logo-box" onclick="location.reload()"><div class="logo-circle">E</div><span>EduardOS</span></div>
     <button class="btn" onclick="showHome()">Home</button>
     <button class="btn" onclick="toggleSpeech()">Speaker Order</button>
     <div id="stopwatch-container">
@@ -89,14 +91,42 @@
         <button class="stopwatch-btn" onclick="resetTimer()">RESET</button>
     </div>
     <div style="flex:1"></div>
-    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; background: #fff9c4;">📝 Quick Notes</button>
-    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ Add Block</button>
+    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; background: #fff9c4;">📝 Quick Note</button>
+    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ New Block</button>
+</div>
+
+<div id="speech-win">
+    <div id="speech-head">
+        <span>Lincoln-Douglas Speaker Order</span>
+        <span onclick="toggleSpeech()" style="cursor:pointer; font-size: 20px;">×</span>
+    </div>
+    <table class="speech-table">
+        <thead>
+            <tr>
+                <th>Speech / Event</th>
+                <th style="text-align: right;">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Affirmative Constructive (1AC)</td><td class="time-col">6:00</td></tr>
+            <tr><td>Cross-Examination of Aff by Neg</td><td class="time-col">3:00</td></tr>
+            <tr><td>Negative Constructive (1NC)</td><td class="time-col">7:00</td></tr>
+            <tr><td>Cross-Examination of Neg by Aff</td><td class="time-col">3:00</td></tr>
+            <tr><td>1st Affirmative Rebuttal (1AR)</td><td class="time-col">4:00</td></tr>
+            <tr><td>Negative Rebuttal (NR)</td><td class="time-col">6:00</td></tr>
+            <tr><td>2nd Affirmative Rebuttal (2AR)</td><td class="time-col">3:00</td></tr>
+            <tr style="background: #fff9db;">
+                <td><strong>Preparation Time (per side)</strong></td>
+                <td class="time-col">4:00</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; color: white;">
-        <h1 style="font-weight: 700;">Strategic Case Files</h1>
-        <button class="btn" style="background: rgba(255,255,255,0.2); color:white; border:none;" onclick="createNewCase()">+ New Case</button>
+        <h1 style="font-size: 32px; letter-spacing: -1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Strategic Case Files</h1>
+        <button class="btn" style="background: var(--accent); color:white; border:none; padding: 12px 20px;" onclick="createNewCase()">+ Create New Case</button>
     </div>
     <div class="case-grid" id="case-grid" style="max-width: 1200px; margin: 30px auto; width: 100%;"></div>
 </div>
@@ -106,44 +136,38 @@
     <div id="resizer"></div>
     <div id="right-zone">
         <div id="tab-view">
-            <div id="active-title" style="font-size:34px; margin-bottom:25px; outline:none;" contenteditable="true" oninput="syncTabTitle()"></div>
-            <div id="active-body" style="outline:none; line-height:1.8;" contenteditable="true" oninput="syncTabBody()"></div>
+            <div id="active-title" style="font-size:34px; margin-bottom:20px; font-weight:700; outline:none;" contenteditable="true" oninput="syncTabTitle()"></div>
+            <div id="active-body" style="outline:none; line-height:1.8; font-size:18px;" contenteditable="true" oninput="syncTabBody()"></div>
         </div>
         <div id="sidebar">
-            <div class="search-container"><input type="text" id="sidebar-search" placeholder="Search blocks..." oninput="renderTabs()"></div>
+            <div class="search-container"><input type="text" id="sidebar-search" placeholder="Search arguments..." oninput="renderTabs()"></div>
             <div id="tab-list"></div>
         </div>
     </div>
 </div>
 
 <div id="sticky-note">
-    <div id="sticky-header"><span>FLOW NOTE</span><span onclick="toggleNotes()" style="cursor:pointer">×</span></div>
-    <textarea id="sticky-content" placeholder="Type here and drag into sidebar..." oninput="saveNotes()"></textarea>
-</div>
-
-<div id="speech-win">
-    <div id="speech-head"><span>LD Times</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
-    <table class="speech-table">
-        <tr><td>1AC / 1NC</td><td>6:00 / 7:00</td></tr>
-        <tr><td>Cross-Ex</td><td>3:00</td></tr>
-        <tr><td>1AR / NR / 2AR</td><td>4:00 / 6:00 / 3:00</td></tr>
-        <tr><td>Prep Time</td><td>4:00</td></tr>
-    </table>
+    <div id="sticky-header"><span>FLOATING FLOW NOTE</span><span onclick="toggleNotes()" style="cursor:pointer">CLOSE ×</span></div>
+    <textarea id="sticky-content" placeholder="Jot down a flow point... drag this box into the sidebar to save it as a permanent block." oninput="saveNotes()"></textarea>
 </div>
 
 <script>
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
     let currentCaseIdx = null, currentTabIdx = null;
 
-    // RESIZER LOGIC
+    // GUTTER RESIZER
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
     resizer.addEventListener('mousedown', (e) => {
+        document.body.style.cursor = 'col-resize';
         const doResize = (ev) => {
             const width = (ev.clientX / window.innerWidth) * 100;
-            if (width > 20 && width < 70) leftSide.style.width = width + '%';
+            if (width > 15 && width < 80) leftSide.style.width = width + '%';
         };
-        const stopResize = () => { document.removeEventListener('mousemove', doResize); };
+        const stopResize = () => { 
+            document.body.style.cursor = 'default';
+            document.removeEventListener('mousemove', doResize); 
+        };
         document.addEventListener('mousemove', doResize);
         document.addEventListener('mouseup', stopResize, {once:true});
     });
@@ -157,18 +181,10 @@
         cases.forEach((c, i) => {
             const card = document.createElement('div'); card.className = 'case-card';
             card.onclick = () => openCase(i);
-            card.innerHTML = `<strong>${c.name}</strong><div style="position:absolute; top:20px; right:20px;" onclick="toggleMenu(event, ${i})">⋮</div>
-            <div id="menu-${i}" class="action-popup">
-                <button class="menu-btn" onclick="renameCase(event, ${i})">Rename</button>
-                <button class="menu-btn" style="color:red;" onclick="deleteCase(event, ${i})">Delete</button>
-            </div>`;
+            card.innerHTML = `<strong>${c.name}</strong><div style="position:absolute; bottom:20px; right:20px; opacity:0.6" onclick="deleteCase(event, ${i})">🗑️</div>`;
             grid.appendChild(card);
         });
     }
-
-    function toggleMenu(e, i) { e.stopPropagation(); closeMenus(); document.getElementById(`menu-${i}`).style.display = 'flex'; }
-    function closeMenus() { document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); }
-    window.onclick = () => closeMenus();
 
     function openCase(i) {
         currentCaseIdx = i;
@@ -176,7 +192,7 @@
         document.getElementById('workspace').style.display = "flex";
         document.getElementById('notes-btn').style.display = "block";
         document.getElementById('add-tab-btn').style.display = "block";
-        document.getElementById('main-editor').innerHTML = cases[i].mainContent;
+        document.getElementById('main-editor').innerHTML = cases[i].mainContent || "Start typing your constructive...";
         renderTabs();
     }
 
@@ -191,8 +207,8 @@
             d.onclick = () => selectTab(i);
             d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
-                    <button class="menu-btn" onclick="tabify(event, ${i})">⤴ Tabify (Sticky)</button>
-                    <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
+                    <button class="menu-btn" onclick="tabify(event, ${i})">⤴ Pop Out to Sticky</button>
+                    <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete Block</button>
                     <div class="color-picker-row">
                         <div class="swatch" style="background:#c8e6c9" onclick="setTabColor(event, ${i}, '#c8e6c9')"></div>
                         <div class="swatch" style="background:#bbdefb" onclick="setTabColor(event, ${i}, '#bbdefb')"></div>
@@ -204,7 +220,6 @@
         });
     }
 
-    // TABIFY LOGIC
     function tabify(e, i) {
         e.stopPropagation();
         const t = cases[currentCaseIdx].tabs[i];
@@ -215,18 +230,21 @@
     }
 
     function setTabColor(e, i, color) { e.stopPropagation(); cases[currentCaseIdx].tabs[i].color = color; save(); renderTabs(); }
-    function deleteTab(e, i) { e.stopPropagation(); cases[currentCaseIdx].tabs.splice(i, 1); save(); renderTabs(); }
+    function deleteTab(e, i) { e.stopPropagation(); if(confirm("Delete this block?")) { cases[currentCaseIdx].tabs.splice(i, 1); save(); renderTabs(); } }
+    function toggleTabMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none'); document.getElementById(`tab-menu-${i}`).style.display = 'flex'; }
+    window.onclick = () => document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none');
+
     function selectTab(i) { currentTabIdx = i; document.getElementById('active-title').innerText = cases[currentCaseIdx].tabs[i].title; document.getElementById('active-body').innerHTML = cases[currentCaseIdx].tabs[i].body; renderTabs(); }
-    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "...", color: "white" }); save(); renderTabs(); }
-    function createNewCase() { const n = prompt("Case Name:"); if(n) { cases.push({ name: n, mainContent: "", tabs: [] }); save(); renderHome(); } }
-    function deleteCase(e, i) { e.stopPropagation(); cases.splice(i,1); save(); renderHome(); }
-    function renameCase(e, i) { e.stopPropagation(); const n = prompt("New Name:", cases[i].name); if(n) { cases[i].name = n; save(); renderHome(); } }
+    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Evidence goes here...", color: "white" }); save(); renderTabs(); }
+    function createNewCase() { const n = prompt("Case Name:"); if(n) { cases.push({ name: n, mainContent: "<h1>"+n+"</h1>", tabs: [] }); save(); renderHome(); } }
+    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete entire case?")) { cases.splice(i,1); save(); renderHome(); } }
     
     function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
     function showHome() { renderHome(); }
     function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
     function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
     function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
+    
     function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; }
 
     // TIMER
@@ -244,7 +262,7 @@
     }
     function resetTimer() { clearInterval(timerInterval); elapsedTime = 0; timerRunning = false; document.getElementById('timer-display').innerText = '00:00:00'; document.getElementById('st-btn').innerText = 'START'; }
 
-    // STICKY DRAG & DROP
+    // STICKY NOTES DRAG
     const noteEl = document.getElementById("sticky-note");
     const sidebarEl = document.getElementById("sidebar");
     let activeDrag = false, xOffset = 0, yOffset = 0, initialX, initialY;
@@ -255,7 +273,7 @@
         if (!activeDrag) return;
         const rect = sidebarEl.getBoundingClientRect();
         if (e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom) {
-            cases[currentCaseIdx].tabs.push({ title: "Flow Note", body: document.getElementById('sticky-content').value, color: "#fff9c4" });
+            cases[currentCaseIdx].tabs.push({ title: "New Flow Point", body: document.getElementById('sticky-content').value, color: "#fff9c4" });
             document.getElementById('sticky-content').value = ''; noteEl.style.display = 'none';
             save(); renderTabs();
         }
