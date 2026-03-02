@@ -6,26 +6,38 @@
     <title>EduardOS</title>
     <style>
         :root { 
-            --accent: #002347; /* Deep Midnight Blue */
+            --accent: #002347; 
             --bg: #f4f7f9; 
             --border: #ced4da; 
             --text: #1c1e21; 
             --glass: rgba(255, 255, 255, 0.85);
+            --font-main: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
-        body { margin: 0; font-family: 'SF Pro Display', 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+        body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
         
         /* Toolbar */
         #toolbar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; background: white; gap: 10px; z-index: 100; flex-shrink: 0; }
         
-        /* THE NEW LOGO: E for EduardOS */
-        .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); margin-right: 15px; border-right: 1px solid var(--border); padding-right: 15px; letter-spacing: 0.5px; }
+        .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); margin-right: 15px; border-right: 1px solid var(--border); padding-right: 15px; }
         .logo-circle { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-family: serif; }
 
-        .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: 500; transition: 0.2s; }
-        .btn:hover { background: #f8f9fa; border-color: var(--accent); }
+        /* Unified Button Style */
+        .btn { 
+            padding: 8px 14px; 
+            border: 1px solid var(--border); 
+            background: white; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            font-family: var(--font-main);
+            color: #444;
+            transition: 0.2s; 
+        }
+        .btn:hover { background: #f8f9fa; border-color: var(--accent); color: var(--accent); }
 
-        /* Home Screen with Mesh Gradient */
+        /* Home Screen */
         #home-screen { 
             position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); 
             background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%);
@@ -39,72 +51,57 @@
             padding: 30px; cursor: pointer; position: relative; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-        .case-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.95); box-shadow: 0 15px 50px rgba(0,0,0,0.3); }
+        .case-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.95); }
 
-        /* Resizable Divider - Touch Optimized */
+        /* Resizable Divider */
         #workspace { display: flex; flex: 1; overflow: hidden; width: 100%; position: relative; background: #fff; }
         #main-section { width: 38%; min-width: 250px; padding: 20px; background: #eaeff2; overflow-y: auto; box-sizing: border-box; }
         
-        /* Gutter handle */
-        #resizer { 
-            width: 16px; 
-            margin: 0 -8px; 
-            cursor: col-resize; 
-            background: transparent; 
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: none;
-        }
-        #resizer::after { content: ""; width: 4px; height: 40px; background: #cbd5e0; border-radius: 10px; transition: 0.2s; }
-        #resizer:hover::after, #resizer.active::after { background: var(--accent); height: 60px; }
+        #resizer { width: 16px; margin: 0 -8px; cursor: col-resize; background: transparent; z-index: 1000; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        #resizer::after { content: ""; width: 4px; height: 40px; background: #cbd5e0; border-radius: 10px; }
 
         /* Editor Zones */
         #right-zone { flex: 1; display: flex; overflow: hidden; }
         #tab-view { flex: 1; padding: 45px; overflow-y: auto; background: white; }
         #sidebar { width: 280px; border-left: 1px solid var(--border); background: #fdfdfd; }
         
-        .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; border-radius: 2px; font-size: 16px; }
-        .tab-item { padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .tab-item.active { border-color: var(--accent); background: #f0f4f8; font-weight: 600; color: var(--accent); }
+        .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; border-radius: 2px; }
+        .tab-item { padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        .tab-item.active { border-color: var(--accent); background: #f0f4f8; font-weight: 700; color: var(--accent); }
 
-        /* Popup Actions */
+        /* Popups */
         .action-popup { position: absolute; top: 45px; right: 15px; background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; width: 150px; z-index: 200; overflow: hidden; border: 1px solid #eee; }
-        .action-popup button { border: none; padding: 12px 16px; text-align: left; background: none; cursor: pointer; font-size: 14px; color: #444; }
-        .action-popup button:hover { background: #f7f9fc; color: var(--accent); }
+        .action-popup button { border: none; padding: 12px 16px; text-align: left; background: none; cursor: pointer; font-size: 14px; font-family: var(--font-main); font-weight: 500; }
+        
+        #speech-win { position: absolute; width: 420px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 2000; top: 80px; left: 30%; overflow: hidden; border: 1px solid #e2e8f0; }
+        #speech-head { padding: 15px; background: var(--accent); color:white; cursor:move; display:flex; justify-content:space-between; touch-action:none; font-weight:700; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div id="toolbar">
-    <div class="logo-box">
-        <div class="logo-circle">E</div>
-        <span>EduardOS</span>
-    </div>
+    <div class="logo-box"><div class="logo-circle">E</div><span>EduardOS</span></div>
     <button class="btn" onclick="showHome()">Home</button>
     <button class="btn" onclick="toggleSpeech()">Speech Times</button>
     <div style="flex:1"></div>
-    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none; color: #003366; border-color: #003366;">+ Add Rebuttal Block</button>
+    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none; color: var(--accent); border-color: var(--accent);">+ Add Rebuttal Block</button>
 </div>
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; color: white;">
-        <h1 style="font-weight: 300; letter-spacing: 1.5px; font-size: 32px;">Strategic Case Files</h1>
-        <button class="btn" onclick="createNewCase()" style="background: white; color: #001529; padding: 12px 28px; border: none; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">+ New Case</button>
+        <h1 style="font-weight: 700; letter-spacing: 0.5px; font-size: 32px;">Strategic Case Files</h1>
+        <button class="btn" onclick="createNewCase()" style="background: white; color: #001529; padding: 12px 28px; border: none; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">+ New Case</button>
     </div>
     <div class="case-grid" id="case-grid" style="max-width: 1200px; margin: 30px auto; width: 100%;"></div>
 </div>
 
 <div id="workspace" style="display:none;">
-    <div id="main-section">
-        <div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div>
-    </div>
+    <div id="main-section"><div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div></div>
     <div id="resizer"></div>
     <div id="right-zone">
         <div id="tab-view">
-            <div id="active-title" style="font-size:34px; margin-bottom:25px; outline:none; font-weight: 300; color: #1a202c;" contenteditable="true" oninput="syncTabTitle()"></div>
-            <div id="active-body" style="outline:none; line-height:1.8; font-size:17px; color: #2d3748;" contenteditable="true" oninput="syncTabBody()"></div>
+            <div id="active-title" style="font-size:34px; margin-bottom:25px; outline:none; font-weight: 300;" contenteditable="true" oninput="syncTabTitle()"></div>
+            <div id="active-body" style="outline:none; line-height:1.8; font-size:17px;" contenteditable="true" oninput="syncTabBody()"></div>
         </div>
         <div id="sidebar">
             <div style="padding:25px 15px 10px; font-size:11px; color:#a0aec0; font-weight:bold; letter-spacing: 1.2px;">ARGUMENT REPOSITORY</div>
@@ -113,9 +110,9 @@
     </div>
 </div>
 
-<div id="speech-win" style="position: absolute; width: 420px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 2000; top: 80px; left: 30%; overflow: hidden; border: 1px solid #e2e8f0;">
-    <div id="speech-head" style="padding:15px; background: #002347; color:white; cursor:move; display:flex; justify-content:space-between; touch-action:none; font-weight:600;"><span>Lincoln-Douglas Protocol</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
-    <div style="padding:20px;">
+<div id="speech-win">
+    <div id="speech-head"><span>Lincoln-Douglas Protocol</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
+    <div style="padding:20px; font-family: var(--font-main);">
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
             <tr style="border-bottom: 1px solid #edf2f7;"><td style="padding:10px 0;">Affirmative Constructive</td><td style="text-align:right; font-weight:bold;">6:00</td></tr>
             <tr style="border-bottom: 1px solid #edf2f7;"><td style="padding:10px 0;">Cross-Examination</td><td style="text-align:right; font-weight:bold;">3:00</td></tr>
@@ -132,27 +129,21 @@
     let currentCaseIdx = null;
     let currentTabIdx = null;
 
-    // --- ENHANCED RESIZER FOR TOUCH ---
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
 
     const initResize = (e) => {
-        resizer.classList.add('active');
         const moveEvent = e.type.includes('touch') ? 'touchmove' : 'mousemove';
         const endEvent = e.type.includes('touch') ? 'touchend' : 'mouseup';
-        
         const handleMove = (ev) => {
             const x = ev.type.includes('touch') ? ev.touches[0].clientX : ev.clientX;
             const width = (x / window.innerWidth) * 100;
             if (width > 20 && width < 75) leftSide.style.width = width + '%';
         };
-
         const handleEnd = () => {
-            resizer.classList.remove('active');
             document.removeEventListener(moveEvent, handleMove);
             document.removeEventListener(endEvent, handleEnd);
         };
-
         document.addEventListener(moveEvent, handleMove, { passive: false });
         document.addEventListener(endEvent, handleEnd);
     };
@@ -160,84 +151,38 @@
     resizer.addEventListener('mousedown', initResize);
     resizer.addEventListener('touchstart', initResize);
 
-    // --- CORE LOGIC ---
     function renderHome() {
         document.getElementById('home-screen').style.display = "flex";
         document.getElementById('workspace').style.display = "none";
         document.getElementById('add-tab-btn').style.display = "none";
-        const grid = document.getElementById('case-grid');
-        grid.innerHTML = '';
+        const grid = document.getElementById('case-grid'); grid.innerHTML = '';
         cases.forEach((c, i) => {
             const card = document.createElement('div');
             card.className = 'case-card';
             card.onclick = () => openCase(i);
             card.innerHTML = `
-                <div style="font-weight:600; font-size: 20px; color:#1a202c;">${c.name}</div>
-                <div style="font-size:12px; margin-top:8px; color:#718096; text-transform:uppercase; letter-spacing:1px;">Policy Dossier</div>
+                <div style="font-weight:700; font-size: 20px;">${c.name}</div>
+                <div style="font-size:12px; margin-top:8px; color:#718096; text-transform:uppercase; letter-spacing:1px; font-weight:600;">Policy Dossier</div>
                 <div style="position:absolute; top:20px; right:20px; font-size:20px; color:#a0aec0;" onclick="toggleMenu(event, ${i})">⋮</div>
                 <div id="menu-${i}" class="action-popup">
                     <button onclick="renameCase(event, ${i})">Rename Case</button>
                     <button style="color:#e53e3e;" onclick="deleteCase(event, ${i})">Delete Case</button>
-                </div>
-            `;
+                </div>`;
             grid.appendChild(card);
         });
     }
 
-    function toggleMenu(e, i) {
-        e.stopPropagation();
-        document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none');
-        document.getElementById(`menu-${i}`).style.display = 'flex';
-    }
-
+    function toggleMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none'); document.getElementById(`menu-${i}`).style.display = 'flex'; }
     window.onclick = () => document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none');
-
-    function createNewCase() {
-        const n = prompt("Case Name:");
-        if (n) { 
-            cases.push({ name: n, mainContent: "<h1>" + n + "</h1><p>Define framework here...</p>", tabs: [] }); 
-            save(); renderHome(); 
-        }
-    }
-
-    function openCase(i) {
-        currentCaseIdx = i;
-        document.getElementById('home-screen').style.display = "none";
-        document.getElementById('workspace').style.display = "flex";
-        document.getElementById('add-tab-btn').style.display = "block";
-        document.getElementById('main-editor').innerHTML = cases[i].mainContent;
-        currentTabIdx = null;
-        renderTabs();
-    }
-
-    function addTab() {
-        cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Evidence data..." });
-        save(); renderTabs(); selectTab(cases[currentCaseIdx].tabs.length - 1);
-    }
-
-    function selectTab(i) {
-        currentTabIdx = i;
-        const t = cases[currentCaseIdx].tabs[i];
-        document.getElementById('active-title').innerText = t.title;
-        document.getElementById('active-body').innerHTML = t.body;
-        renderTabs();
-    }
-
-    function renderTabs() {
-        const list = document.getElementById('tab-list'); list.innerHTML = '';
-        cases[currentCaseIdx].tabs.forEach((t, i) => {
-            const d = document.createElement('div');
-            d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`;
-            d.onclick = () => selectTab(i);
-            d.innerText = t.title;
-            list.appendChild(d);
-        });
-    }
-
+    function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>" + n + "</h1>", tabs: [] }); save(); renderHome(); } }
+    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
+    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Evidence data..." }); save(); renderTabs(); selectTab(cases[currentCaseIdx].tabs.length - 1); }
+    function selectTab(i) { currentTabIdx = i; const t = cases[currentCaseIdx].tabs[i]; document.getElementById('active-title').innerText = t.title; document.getElementById('active-body').innerHTML = t.body; renderTabs(); }
+    function renderTabs() { const list = document.getElementById('tab-list'); list.innerHTML = ''; cases[currentCaseIdx].tabs.forEach((t, i) => { const d = document.createElement('div'); d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`; d.onclick = () => selectTab(i); d.innerText = t.title; list.appendChild(d); }); }
     function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
     function showHome() { renderHome(); }
     function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = s.style.display === 'flex' ? 'none' : 'flex'; }
-    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Permanently delete?")) cases.splice(i,1); save(); renderHome(); }
+    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete?")) cases.splice(i,1); save(); renderHome(); }
     function renameCase(e, i) { e.stopPropagation(); const n = prompt("New name:", cases[i].name); if(n) cases[i].name=n; save(); renderHome(); }
     function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
     function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
