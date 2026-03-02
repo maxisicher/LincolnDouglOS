@@ -16,11 +16,19 @@
         
         body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
         
+        /* UPDATED TOOLBAR STYLES */
         #toolbar { height: 50px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; background: white; gap: 10px; z-index: 100; flex-shrink: 0; }
         .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); border-right: 1px solid var(--border); padding-right: 15px; }
         .logo-circle { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-family: serif; }
 
-        .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; }
+        /* Buttons updated with Dark Blue theme color */
+        .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; color: var(--accent); }
+        .btn:hover { background: #f0f4f8; }
+
+        /* Stopwatch Styles */
+        #stopwatch-container { display: flex; align-items: center; gap: 12px; position: absolute; left: 50%; transform: translateX(-50%); background: #f1f3f5; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); }
+        #timer-display { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 65px; text-align: center; }
+        .stopwatch-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 800; padding: 2px 6px; }
 
         /* Liquid Glass Buttons/Cards */
         .glass-btn {
@@ -92,8 +100,15 @@
     <div class="logo-box"><div class="logo-circle">E</div><span style="margin-left:8px">EduardOS</span></div>
     <button class="btn" onclick="showHome()">Home</button>
     <button class="btn" onclick="toggleSpeech()">Speech Times</button>
+    
+    <div id="stopwatch-container">
+        <button class="stopwatch-btn" id="start-pause-btn" onclick="toggleTimer()">START</button>
+        <div id="timer-display">00:00</div>
+        <button class="stopwatch-btn" onclick="resetTimer()">RESET</button>
+    </div>
+
     <div style="flex:1"></div>
-    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none; color: var(--accent); border-color: var(--accent);">+ Add Rebuttal Block</button>
+    <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ Add Rebuttal Block</button>
 </div>
 
 <div id="home-screen">
@@ -137,6 +152,40 @@
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
     let currentCaseIdx = null;
     let currentTabIdx = null;
+
+    // Stopwatch Logic
+    let timer;
+    let seconds = 0;
+    let timerRunning = false;
+
+    function toggleTimer() {
+        const btn = document.getElementById('start-pause-btn');
+        if (!timerRunning) {
+            timer = setInterval(updateTimer, 1000);
+            btn.innerText = 'PAUSE';
+            timerRunning = true;
+        } else {
+            clearInterval(timer);
+            btn.innerText = 'START';
+            timerRunning = false;
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        seconds = 0;
+        timerRunning = false;
+        document.getElementById('timer-display').innerText = '00:00';
+        document.getElementById('start-pause-btn').innerText = 'START';
+    }
+
+    function updateTimer() {
+        seconds++;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        document.getElementById('timer-display').innerText = 
+            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
 
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
