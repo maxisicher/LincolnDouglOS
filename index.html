@@ -47,6 +47,11 @@
         .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; color: var(--accent); }
         .btn:hover { background: #f0f4f8; }
 
+        #format-bar { display: none; align-items: center; gap: 5px; border-left: 1px solid var(--border); padding-left: 15px; margin-left: 5px; }
+        .format-btn { width: 32px; height: 32px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer; font-family: serif; font-weight: bold; font-size: 14px; color: var(--accent); display: flex; align-items: center; justify-content: center; }
+        body.dark-mode .format-btn { background: #2a2a2a; color: #e0e0e0; border-color: #444; }
+        .format-btn:hover { background: #f0f4f8; }
+
         #stopwatch-container { display: flex; align-items: center; gap: 12px; position: absolute; left: 50%; transform: translateX(-50%); background: #f1f3f5; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); }
         body.dark-mode #stopwatch-container { background: #252525; }
         #timer-display { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 90px; text-align: center; }
@@ -125,6 +130,15 @@
 
 <div id="toolbar">
     <div class="logo-box" onclick="location.reload()"><div class="logo-circle">E</div><span>EduardOS</span></div>
+    
+    <div id="format-bar">
+        <button class="format-btn" onclick="execFormat('bold')">B</button>
+        <button class="format-btn" onclick="execFormat('italic')" style="font-style: italic;">I</button>
+        <button class="format-btn" onclick="execFormat('underline')" style="text-decoration: underline;">U</button>
+        <button class="format-btn" onclick="changeFontSize(1)">A+</button>
+        <button class="format-btn" onclick="changeFontSize(-1)">A-</button>
+    </div>
+
     <button class="btn" onclick="showHome()">Home</button>
     <button class="btn" onclick="toggleSpeech()">Speaker Order</button>
     <div id="stopwatch-container">
@@ -196,6 +210,23 @@
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
     let currentCaseIdx = null, currentTabIdx = null;
 
+    function execFormat(cmd) { document.execCommand(cmd, false, null); }
+    function changeFontSize(dir) {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const parent = sel.anchorNode.parentElement;
+        const cur = window.getComputedStyle(parent).fontSize;
+        const next = (parseFloat(cur) + (dir * 2)) + "px";
+        document.execCommand("fontSize", false, "3");
+        const fonts = document.getElementsByTagName("font");
+        for (let i = 0; i < fonts.length; i++) {
+            if (fonts[i].size === "3") {
+                fonts[i].removeAttribute("size");
+                fonts[i].style.fontSize = next;
+            }
+        }
+    }
+
     const resizer = document.getElementById('resizer');
     const leftSide = document.getElementById('main-section');
     resizer.addEventListener('mousedown', (e) => {
@@ -211,6 +242,7 @@
     function renderHome() {
         document.getElementById('home-screen').style.display = "flex";
         document.getElementById('workspace').style.display = "none";
+        document.getElementById('format-bar').style.display = "none";
         document.getElementById('notes-btn').style.display = "none";
         document.getElementById('add-tab-btn').style.display = "none";
         const grid = document.getElementById('case-grid'); grid.innerHTML = '';
@@ -239,6 +271,7 @@
         currentCaseIdx = i;
         document.getElementById('home-screen').style.display = "none";
         document.getElementById('workspace').style.display = "flex";
+        document.getElementById('format-bar').style.display = "flex";
         document.getElementById('notes-btn').style.display = "block";
         document.getElementById('add-tab-btn').style.display = "block";
         document.getElementById('main-editor').innerHTML = cases[i].mainContent || "";
@@ -249,18 +282,14 @@
         const list = document.getElementById('tab-list'); list.innerHTML = '';
         const search = document.getElementById('sidebar-search').value.toLowerCase();
         const isDark = document.body.classList.contains('dark-mode');
-
         cases[currentCaseIdx].tabs.forEach((t, i) => {
             if (search && !t.title.toLowerCase().includes(search)) return;
             const d = document.createElement('div');
             d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`;
-            
-            // Apply color coding
             if (t.color && t.color !== 'white') {
                 d.style.backgroundColor = isDark ? t.color + '44' : t.color;
                 d.style.borderColor = t.color;
             }
-
             d.onclick = () => selectTab(i);
             d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
@@ -276,21 +305,10 @@
         e.stopPropagation();
         const colors = { "Default": "white", "Green": "#d4edda", "Blue": "#d1ecf1", "Red": "#f8d7da", "Yellow": "#fff3cd" };
         const choice = prompt("Choose color: Default, Green, Blue, Red, Yellow", "Green");
-        if (colors[choice]) {
-            cases[currentCaseIdx].tabs[i].color = colors[choice];
-            save(); renderTabs();
-        }
+        if (colors[choice]) { cases[currentCaseIdx].tabs[i].color = colors[choice]; save(); renderTabs(); }
     }
 
-    function deleteTab(e, i) {
-        e.stopPropagation();
-        if(confirm("Delete this block?")) {
-            cases[currentCaseIdx].tabs.splice(i, 1);
-            if(currentTabIdx === i) currentTabIdx = null;
-            save(); renderTabs();
-        }
-    }
-
+    function deleteTab(e, i) { e.stopPropagation(); if(confirm("Delete this block?")) { cases[currentCaseIdx].tabs.splice(i, 1); if(currentTabIdx === i) currentTabIdx = null; save(); renderTabs(); } }
     function tabify(e, i) { e.stopPropagation(); const t = cases[currentCaseIdx].tabs[i]; document.getElementById('sticky-content').value = t.body; cases[currentCaseIdx].tabs.splice(i, 1); noteEl.style.display = 'flex'; save(); renderTabs(); }
     function selectTab(i) { currentTabIdx = i; document.getElementById('active-title').innerText = cases[currentCaseIdx].tabs[i].title; document.getElementById('active-body').innerHTML = cases[currentCaseIdx].tabs[i].body; renderTabs(); }
     function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "...", color: "white" }); save(); renderTabs(); }
