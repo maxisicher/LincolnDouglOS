@@ -27,9 +27,6 @@
         #timer-display { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 90px; text-align: center; }
         .stopwatch-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 800; padding: 2px 6px; }
 
-        #about-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 3000; width: 320px; text-align: center; display: none; }
-
-        /* Draggable & Resizable Sticky Note */
         #sticky-note {
             position: absolute; width: 280px; height: 280px; background: #fff9c4; 
             box-shadow: 5px 5px 20px rgba(0,0,0,0.25); border-radius: 4px; display: none;
@@ -37,67 +34,60 @@
             overflow: hidden; resize: both; min-width: 150px; min-height: 150px;
         }
         #sticky-header { padding: 10px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #857b26; touch-action: none; }
-        #sticky-content { flex: 1; border: none; background: transparent; padding: 12px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 14px; line-height: 1.4; }
+        #sticky-content { flex: 1; border: none; background: transparent; padding: 12px; resize: none; outline: none; font-family: 'SF Mono', monospace; font-size: 14px; }
 
-        .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: 0.3s; }
-        #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; overflow-y: auto; }
-        .case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
-        .case-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 30px; cursor: pointer; position: relative; transition: 0.4s; color: white; }
+        .glass-btn { background: var(--glass-white); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; color: white; padding: 14px 28px; font-weight: 600; cursor: pointer; }
+        #home-screen { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px); background: linear-gradient(135deg, #001529 0%, #002347 40%, #003a70 100%); z-index: 90; display: flex; flex-direction: column; padding: 40px; box-sizing: border-box; }
         
         #workspace { display: flex; flex: 1; overflow: hidden; background: #fff; }
         #main-section { width: 38%; min-width: 250px; padding: 20px; background: #eaeff2; overflow-y: auto; }
-        #resizer { width: 16px; margin: 0 -8px; cursor: col-resize; z-index: 1000; display: flex; align-items: center; justify-content: center; touch-action: none; }
+        #resizer { width: 16px; cursor: col-resize; z-index: 1000; display: flex; align-items: center; justify-content: center; touch-action: none; }
         #resizer::after { content: ""; width: 4px; height: 40px; background: #cbd5e0; border-radius: 10px; }
+        
         #right-zone { flex: 1; display: flex; overflow: hidden; }
         #tab-view { flex: 1; padding: 45px; overflow-y: auto; background: white; }
-        #sidebar { width: 280px; border-left: 1px solid var(--border); background: #fdfdfd; }
+        #sidebar { width: 280px; border-left: 1px solid var(--border); background: #fdfdfd; transition: background 0.2s; }
+        #sidebar.drag-over { background: #e3f2fd; border-left: 2px dashed var(--accent); }
+        
         .doc { background: white; min-height: 100%; padding: 45px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); outline: none; }
-        .tab-item { padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; }
-        .tab-item.active { border-color: var(--accent); background: #f0f4f8; font-weight: 700; color: var(--accent); }
         
-        .action-popup { position: absolute; top: 45px; right: 15px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; width: 160px; z-index: 200; overflow: hidden; border: 1px solid #eee; }
-        .action-popup button { border: none; padding: 12px 16px; text-align: left; background: none; cursor: pointer; font-size: 13px; color: #1c1e21; font-weight: 500; }
-        
-        #speech-win { position: absolute; width: 420px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 2000; top: 80px; left: 30%; overflow: hidden; border: 1px solid #e2e8f0; }
-        #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
+        /* Tab Styles with Menu */
+        .tab-item { position: relative; padding: 14px; margin: 10px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .tab-item.active { border-color: var(--accent); background: #f0f4f8; font-weight: 700; }
+        .tab-item.is-flow { background: #fff9c4; border-color: #f0e68c; }
+        .tab-dots { padding: 0 5px; color: #999; cursor: pointer; }
+
+        .tab-menu { position: absolute; top: 40px; right: 10px; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 3000; display: none; flex-direction: column; overflow: hidden; }
+        .tab-menu button { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 12px; }
+        .tab-menu button:hover { background: #f5f5f5; }
+
+        #about-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 3000; width: 320px; text-align: center; display: none; }
     </style>
 </head>
 <body>
 
 <div id="toolbar">
-    <div class="logo-box" onclick="toggleAbout()">
-        <div class="logo-circle">E</div><span style="margin-left:8px">EduardOS</span>
-    </div>
+    <div class="logo-box" onclick="toggleAbout()"><div class="logo-circle">E</div><span style="margin-left:8px">EduardOS</span></div>
     <button class="btn" onclick="showHome()">Home</button>
-    <button class="btn" onclick="toggleSpeech()">Speech Times</button>
     <div id="stopwatch-container">
         <button class="stopwatch-btn" id="start-pause-btn" onclick="toggleTimer()">START</button>
         <div id="timer-display">00:00:00</div>
         <button class="stopwatch-btn" onclick="resetTimer()">RESET</button>
     </div>
     <div style="flex:1"></div>
-    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; margin-right: 5px; background: #fff9c4; border-color: #f0e68c;">📝 Quick Notes</button>
+    <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; margin-right: 5px; background: #fff9c4;">📝 Quick Notes</button>
     <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ Add Rebuttal Block</button>
 </div>
 
 <div id="sticky-note">
-    <div id="sticky-header"><span>FLOW NOTES</span><span onclick="toggleNotes()" style="cursor:pointer; padding: 0 5px;">×</span></div>
-    <textarea id="sticky-content" placeholder="Drop flow notes here..." oninput="saveNotes()"></textarea>
-</div>
-
-<div id="about-box">
-    <p style="font-size: 14px; line-height: 1.6; color: var(--accent);">"I made this to better organize my LD cases because I was worried I wouldn’t be able to find my blocks quick enough mid round. So I made this to streamline everything so i don’t freeze up in round - Eduardo Sicher"</p>
-    <button class="btn" onclick="toggleAbout()" style="margin-top:15px; width: 100%;">Close</button>
+    <div id="sticky-header"><span>FLOW NOTE</span><span onclick="toggleNotes()" style="cursor:pointer">×</span></div>
+    <textarea id="sticky-content" placeholder="Drag this note into the sidebar to save as a tab..." oninput="saveNotes()"></textarea>
 </div>
 
 <div id="home-screen">
     <div style="display:flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%; color: white;">
-        <h1 style="font-weight: 700; font-size: 32px;">Strategic Case Files</h1>
-        <div style="display: flex; gap: 15px;">
-            <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importCase(event)">
-            <button class="glass-btn" onclick="document.getElementById('import-file').click()">📂 Import Case</button>
-            <button class="glass-btn" onclick="createNewCase()">+ New Case</button>
-        </div>
+        <h1 style="font-weight: 700;">Strategic Case Files</h1>
+        <button class="glass-btn" onclick="createNewCase()">+ New Case</button>
     </div>
     <div class="case-grid" id="case-grid" style="max-width: 1200px; margin: 30px auto; width: 100%;"></div>
 </div>
@@ -117,86 +107,157 @@
     </div>
 </div>
 
-<div id="speech-win">
-    <div id="speech-head"><span>Lincoln-Douglas Protocol</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
-    <div style="padding:20px;">
-        <table style="width:100%; font-size:13px; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px 0;">1AC</td><td style="text-align:right; font-weight:bold;">6:00</td></tr>
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px 0;">1NC</td><td style="text-align:right; font-weight:bold;">7:00</td></tr>
-            <tr style="border-bottom: 1px solid #eee;"><td style="padding:8px 0;">1AR</td><td style="text-align:right; font-weight:bold;">4:00</td></tr>
-            <tr><td style="padding:8px 0;">NR</td><td style="text-align:right; font-weight:bold;">6:00</td></tr>
-        </table>
-    </div>
+<div id="about-box">
+    <p>"I made this to better organize my LD cases because I was worried I wouldn’t be able to find my blocks quick enough mid round. So I made this to streamline everything so i don’t freeze up in round - Eduardo Sicher"</p>
+    <button class="btn" onclick="toggleAbout()" style="margin-top:15px; width: 100%;">Close</button>
 </div>
 
 <script>
     let cases = JSON.parse(localStorage.getItem('eduardos_data_v4')) || [];
-    let currentCaseIdx = null;
-    let currentTabIdx = null;
+    let currentCaseIdx = null, currentTabIdx = null;
 
-    // --- NOTES LOGIC ---
+    // --- DRAG TO TAB LOGIC ---
+    const noteEl = document.getElementById("sticky-note");
+    const sidebarEl = document.getElementById("sidebar");
+    let activeDrag = false, xOffset = 0, yOffset = 0, initialX, initialY;
+
     function toggleNotes() {
-        const note = document.getElementById('sticky-note');
-        note.style.display = note.style.display === 'flex' ? 'none' : 'flex';
+        noteEl.style.display = noteEl.style.display === 'flex' ? 'none' : 'flex';
         document.getElementById('sticky-content').value = localStorage.getItem('eduardos_notes') || '';
     }
-    function saveNotes() {
-        localStorage.setItem('eduardos_notes', document.getElementById('sticky-content').value);
-    }
 
-    // UPDATED Draggable Logic (Mouse + Touch)
-    const noteEl = document.getElementById("sticky-note");
-    const headerEl = document.getElementById("sticky-header");
-    let activeDrag = false;
-    let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+    function saveNotes() { localStorage.setItem('eduardos_notes', document.getElementById('sticky-content').value); }
 
-    headerEl.addEventListener("touchstart", dragStart, false);
-    document.addEventListener("touchend", dragEnd, false);
-    document.addEventListener("touchmove", drag, false);
+    // Unified Drag Logic
+    const startDrag = (e) => {
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        initialX = clientX - xOffset; initialY = clientY - yOffset;
+        if (e.target.closest('#sticky-header')) activeDrag = true;
+    };
 
-    headerEl.addEventListener("mousedown", dragStart, false);
-    document.addEventListener("mouseup", dragEnd, false);
-    document.addEventListener("mousemove", drag, false);
+    const doDrag = (e) => {
+        if (!activeDrag) return;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        xOffset = clientX - initialX; yOffset = clientY - initialY;
+        noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
 
-    function dragStart(e) {
-        if (e.type === "touchstart") {
-            initialX = e.touches[0].clientX - xOffset;
-            initialY = e.touches[0].clientY - yOffset;
+        // Collision detection for sidebar
+        const rect = sidebarEl.getBoundingClientRect();
+        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
+            sidebarEl.classList.add('drag-over');
         } else {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
+            sidebarEl.classList.remove('drag-over');
         }
-        if (e.target === headerEl || headerEl.contains(e.target)) activeDrag = true;
-    }
+    };
 
-    function dragEnd() {
-        initialX = currentX; initialY = currentY;
+    const endDrag = (e) => {
+        if (!activeDrag) return;
+        const rect = sidebarEl.getBoundingClientRect();
+        const clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
+
+        if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
+            convertToTab();
+        }
         activeDrag = false;
+        sidebarEl.classList.remove('drag-over');
+    };
+
+    function convertToTab() {
+        const content = document.getElementById('sticky-content').value;
+        if (!content && !confirm("Empty note. Create tab anyway?")) return;
+        cases[currentCaseIdx].tabs.push({ title: "Flow Note", body: content, isFlow: true });
+        localStorage.setItem('eduardos_notes', '');
+        document.getElementById('sticky-content').value = '';
+        noteEl.style.display = 'none';
+        save(); renderTabs();
     }
 
-    function drag(e) {
-        if (activeDrag) {
-            e.preventDefault();
-            if (e.type === "touchmove") {
-                currentX = e.touches[0].clientX - initialX;
-                currentY = e.touches[0].clientY - initialY;
-            } else {
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-            }
-            xOffset = currentX; yOffset = currentY;
-            setTranslate(currentX, currentY, noteEl);
+    document.addEventListener("mousedown", startDrag);
+    document.addEventListener("mousemove", doDrag);
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchstart", startDrag);
+    document.addEventListener("touchmove", doDrag);
+    document.addEventListener("touchend", endDrag);
+
+    // --- TAB MANAGEMENT ---
+    function renderTabs() {
+        const list = document.getElementById('tab-list');
+        list.innerHTML = '';
+        cases[currentCaseIdx].tabs.forEach((t, i) => {
+            const d = document.createElement('div');
+            d.className = `tab-item ${i === currentTabIdx ? 'active' : ''} ${t.isFlow ? 'is-flow' : ''}`;
+            d.onclick = () => selectTab(i);
+            d.innerHTML = `
+                <span>${t.title}</span>
+                <span class="tab-dots" onclick="toggleTabMenu(event, ${i})">⋮</span>
+                <div id="tab-menu-${i}" class="tab-menu">
+                    ${t.isFlow ? `<button onclick="tabify(event, ${i})">⤴ Tabify (Pop out)</button>` : ''}
+                    <button style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
+                </div>
+            `;
+            list.appendChild(d);
+        });
+    }
+
+    function toggleTabMenu(e, i) {
+        e.stopPropagation();
+        const menu = document.getElementById(`tab-menu-${i}`);
+        const isVisible = menu.style.display === 'flex';
+        document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none');
+        menu.style.display = isVisible ? 'none' : 'flex';
+    }
+
+    function deleteTab(e, i) {
+        e.stopPropagation();
+        if (confirm("Delete this tab?")) {
+            cases[currentCaseIdx].tabs.splice(i, 1);
+            if (currentTabIdx === i) currentTabIdx = null;
+            save(); renderTabs();
         }
     }
 
-    function setTranslate(xPos, yPos, el) {
-        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+    function tabify(e, i) {
+        e.stopPropagation();
+        const tab = cases[currentCaseIdx].tabs[i];
+        document.getElementById('sticky-content').value = tab.body;
+        saveNotes();
+        cases[currentCaseIdx].tabs.splice(i, 1);
+        noteEl.style.display = 'flex';
+        save(); renderTabs();
     }
 
-    // --- STOPWATCH ---
+    // --- BASIC SYSTEM (RETAINED) ---
+    function renderHome() {
+        document.getElementById('home-screen').style.display = "flex";
+        document.getElementById('workspace').style.display = "none";
+        document.getElementById('notes-btn').style.display = "none";
+        document.getElementById('add-tab-btn').style.display = "none";
+        const grid = document.getElementById('case-grid'); grid.innerHTML = '';
+        cases.forEach((c, i) => {
+            const card = document.createElement('div'); card.className = 'case-card';
+            card.onclick = () => openCase(i);
+            card.innerHTML = `<div style="font-weight:700; font-size: 20px;">${c.name}</div>`;
+            grid.appendChild(card);
+        });
+    }
+    function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>"+n+"</h1>", tabs: [] }); save(); renderHome(); } }
+    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('notes-btn').style.display = "block"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
+    function selectTab(i) { currentTabIdx = i; const t = cases[currentCaseIdx].tabs[i]; document.getElementById('active-title').innerText = t.title; document.getElementById('active-body').innerHTML = t.body; renderTabs(); }
+    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "Content here..." }); save(); renderTabs(); }
+    function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
+    function showHome() { renderHome(); }
+    function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
+    function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
+    function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
+    function toggleAbout() { const b = document.getElementById('about-box'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
+    window.onclick = () => document.querySelectorAll('.tab-menu').forEach(m => m.style.display = 'none');
+
+    // Stopwatch
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
     function toggleTimer() {
-        const btn = document.getElementById('start-pause-btn');
         if (!timerRunning) {
             startTime = Date.now() - elapsedTime;
             timerInterval = setInterval(() => {
@@ -204,99 +265,12 @@
                 let d = elapsedTime, m = Math.floor(d/60000), s = Math.floor((d%60000)/1000), ms = Math.floor((d%1000)/10);
                 document.getElementById('timer-display').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}:${ms.toString().padStart(2,'0')}`;
             }, 10);
-            btn.innerText = 'PAUSE'; timerRunning = true;
-        } else { clearInterval(timerInterval); btn.innerText = 'START'; timerRunning = false; }
+            document.getElementById('start-pause-btn').innerText = 'PAUSE'; timerRunning = true;
+        } else { clearInterval(timerInterval); document.getElementById('start-pause-btn').innerText = 'START'; timerRunning = false; }
     }
     function resetTimer() { clearInterval(timerInterval); elapsedTime = 0; timerRunning = false; document.getElementById('timer-display').innerText = '00:00:00'; document.getElementById('start-pause-btn').innerText = 'START'; }
 
-    // --- CASE LOGIC ---
-    function renderHome() {
-        document.getElementById('home-screen').style.display = "flex";
-        document.getElementById('workspace').style.display = "none";
-        document.getElementById('add-tab-btn').style.display = "none";
-        document.getElementById('notes-btn').style.display = "none";
-        const grid = document.getElementById('case-grid'); grid.innerHTML = '';
-        cases.forEach((c, i) => {
-            const card = document.createElement('div'); card.className = 'case-card';
-            card.onclick = () => openCase(i);
-            card.innerHTML = `
-                <div style="font-weight:700; font-size: 20px;">${c.name}</div>
-                <div style="position:absolute; top:20px; right:20px; font-size:20px;" onclick="toggleMenu(event, ${i})">⋮</div>
-                <div id="menu-${i}" class="action-popup">
-                    <button onclick="saveToFile(event, ${i})">💾 Save to File</button>
-                    <button onclick="renameCase(event, ${i})">✏️ Rename</button>
-                    <button style="color:#e53e3e;" onclick="deleteCase(event, ${i})">🗑️ Delete</button>
-                </div>`;
-            grid.appendChild(card);
-        });
-    }
-
-    function saveToFile(e, i) {
-        e.stopPropagation();
-        const data = JSON.stringify(cases[i], null, 2);
-        const blob = new Blob([data], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${cases[i].name.replace(/\s+/g, '_')}_EduardOS.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function importCase(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedCase = JSON.parse(e.target.result);
-                if (importedCase.name && importedCase.mainContent) {
-                    cases.push(importedCase);
-                    save(); renderHome();
-                    alert("Case imported successfully!");
-                }
-            } catch (err) { alert("Error reading file."); }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    }
-
-    function toggleMenu(e, i) { e.stopPropagation(); document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none'); document.getElementById(`menu-${i}`).style.display = 'flex'; }
-    window.onclick = () => document.querySelectorAll('.action-popup').forEach(m => m.style.display = 'none');
-    function toggleAbout() { const b = document.getElementById('about-box'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
-    function createNewCase() { const n = prompt("Case Name:"); if (n) { cases.push({ name: n, mainContent: "<h1>"+n+"</h1>", tabs: [] }); save(); renderHome(); } }
-    function openCase(i) { currentCaseIdx = i; document.getElementById('home-screen').style.display = "none"; document.getElementById('workspace').style.display = "flex"; document.getElementById('add-tab-btn').style.display = "block"; document.getElementById('notes-btn').style.display = "block"; document.getElementById('main-editor').innerHTML = cases[i].mainContent; renderTabs(); }
-    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Argument", body: "Content..." }); save(); renderTabs(); selectTab(cases[currentCaseIdx].tabs.length - 1); }
-    function selectTab(i) { currentTabIdx = i; const t = cases[currentCaseIdx].tabs[i]; document.getElementById('active-title').innerText = t.title; document.getElementById('active-body').innerHTML = t.body; renderTabs(); }
-    function renderTabs() { const list = document.getElementById('tab-list'); list.innerHTML = ''; cases[currentCaseIdx].tabs.forEach((t, i) => { const d = document.createElement('div'); d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`; d.onclick = () => selectTab(i); d.innerText = t.title; list.appendChild(d); }); }
-    function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
-    function showHome() { renderHome(); }
-    function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = s.style.display === 'flex' ? 'none' : 'flex'; }
-    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete?")) { cases.splice(i,1); save(); renderHome(); } }
-    function renameCase(e, i) { e.stopPropagation(); const n = prompt("New name:", cases[i].name); if(n) { cases[i].name=n; save(); renderHome(); } }
-    function syncMainCase() { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); }
-    function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
-    function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
-
     renderHome();
-
-    // Resizer logic for split screen
-    const resizer = document.getElementById('resizer');
-    const leftSide = document.getElementById('main-section');
-    const initResize = (e) => {
-        const moveEvent = e.type.includes('touch') ? 'touchmove' : 'mousemove';
-        const endEvent = e.type.includes('touch') ? 'touchend' : 'mouseup';
-        const handleMove = (ev) => {
-            const x = ev.type.includes('touch') ? ev.touches[0].clientX : ev.clientX;
-            const width = (x / window.innerWidth) * 100;
-            if (width > 20 && width < 75) leftSide.style.width = width + '%';
-        };
-        const handleEnd = () => { document.removeEventListener(moveEvent, handleMove); document.removeEventListener(endEvent, handleEnd); };
-        document.addEventListener(moveEvent, handleMove, { passive: false });
-        document.addEventListener(endEvent, handleEnd);
-    };
-    resizer.addEventListener('mousedown', initResize);
-    resizer.addEventListener('touchstart', initResize);
 </script>
 </body>
 </html>
