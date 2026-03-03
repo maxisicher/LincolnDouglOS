@@ -29,13 +29,16 @@
         body.dark-mode #workspace, 
         body.dark-mode #tab-view, 
         body.dark-mode #sidebar, 
-        body.dark-mode .doc,
-        body.dark-mode #active-title,
-        body.dark-mode #active-body { background: #1a1a1a; color: #e0e0e0; }
+        body.dark-mode .doc { background: #1a1a1a; color: #e0e0e0; }
         
         body.dark-mode .btn, body.dark-mode .format-btn, body.dark-mode .font-select { background: #2a2a2a; color: #e0e0e0; border-color: #444; }
         body.dark-mode #main-section { background: #161616; }
         body.dark-mode .tab-item { background: var(--block-bg); color: #e0e0e0; border-color: #444; }
+        
+        /* FIX: Argument blocks text color in dark mode */
+        body.dark-mode #active-title, 
+        body.dark-mode #active-body { color: #ffffff !important; }
+
         body.dark-mode .action-popup, body.dark-mode .tab-menu { background: #252525; border-color: #444; color: #e0e0e0; }
 
         body { margin: 0; font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); transition: background 0.3s; }
@@ -75,7 +78,7 @@
 
         .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 3000; display: none; flex-direction: column; border: 1px solid #eee; width: 160px; color: var(--text); }
         
-        #speech-win { position: fixed; width: 450px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 5000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; border: 1px solid var(--border); color: #1c1e21; }
+        #speech-win { position: fixed; width: 480px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 5000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; border: 1px solid var(--border); color: #1c1e21; }
         body.dark-mode #speech-win { background: #252525; color: #fff; }
         #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
         .speech-table { width:100%; font-size:14px; border-collapse: collapse; }
@@ -154,14 +157,14 @@
 <div id="speech-win">
     <div id="speech-head"><span>SPEAKER ORDER (LD)</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
     <table class="speech-table">
-        <tr><th>Speech</th><th>Time</th><th>Prep</th></tr>
-        <tr><td>Affirmative Constructive</td><td>6 min</td><td>—</td></tr>
-        <tr><td>Cross-Ex of Aff</td><td>3 min</td><td>—</td></tr>
-        <tr><td>Negative Constructive</td><td>7 min</td><td>4 min</td></tr>
-        <tr><td>Cross-Ex of Neg</td><td>3 min</td><td>—</td></tr>
-        <tr><td>1st Aff Rebuttal</td><td>4 min</td><td>4 min</td></tr>
-        <tr><td>Neg Rebuttal</td><td>6 min</td><td>—</td></tr>
-        <tr><td>2nd Aff Rebuttal</td><td>3 min</td><td>—</td></tr>
+        <tr><th>Speech Name</th><th>Time</th><th>Prep</th></tr>
+        <tr><td>Affirmative Constructive (AC)</td><td>6 min</td><td>—</td></tr>
+        <tr><td>Cross-Ex (Aff) by Neg</td><td>3 min</td><td>—</td></tr>
+        <tr><td>Negative Constructive (NC)</td><td>7 min</td><td>4 min</td></tr>
+        <tr><td>Cross-Ex (Neg) by Aff</td><td>3 min</td><td>—</td></tr>
+        <tr><td>1st Aff Rebuttal (1AR)</td><td>4 min</td><td>4 min</td></tr>
+        <tr><td>Neg Rebuttal (NR)</td><td>6 min</td><td>—</td></tr>
+        <tr><td>2nd Aff Rebuttal (2AR)</td><td>3 min</td><td>—</td></tr>
     </table>
 </div>
 
@@ -248,19 +251,6 @@
         });
     }
 
-    function handleExternalDrop(e) {
-        if (e.dataTransfer.getData('source') === 'tab-list') {
-            const idx = parseInt(e.dataTransfer.getData('blockIndex'));
-            const block = cases[currentCaseIdx].tabs[idx];
-            document.getElementById('sticky-content').value = block.body.replace(/<[^>]*>/g, '');
-            cases[currentCaseIdx].tabs.splice(idx, 1);
-            noteEl.style.display = 'flex';
-            xOffset = e.clientX - 150; yOffset = e.clientY - 150;
-            noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
-            save(); renderTabs();
-        }
-    }
-
     function selectTab(i) { currentTabIdx = i; document.getElementById('active-title').innerText = cases[currentCaseIdx].tabs[i].title; document.getElementById('active-body').innerHTML = cases[currentCaseIdx].tabs[i].body; renderTabs(); }
     function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "..." }); save(); renderTabs(); }
     function createNewCase() { const n = prompt("Name:"); if(n) { cases.push({ name: n, mainContent: "", tabs: [] }); save(); renderHome(); } }
@@ -274,7 +264,12 @@
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
     function toggleSettings(e) { e.stopPropagation(); const p = document.getElementById('settings-popup'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
     function clearAllCases() { localStorage.clear(); location.reload(); }
-    function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
+    
+    // FIX: Function logic for Speaker Order window
+    function toggleSpeech() { 
+        const s = document.getElementById('speech-win'); 
+        s.style.display = (s.style.display === 'block') ? 'none' : 'block'; 
+    }
 
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
     function toggleTimer() {
