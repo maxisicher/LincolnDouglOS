@@ -87,9 +87,12 @@
         .tab-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
         .tab-item.active { border-color: var(--accent); border-width: 2px; font-weight: 700; }
 
-        /* FIX: Layering adjustments */
+        /* FIX: Final Layering Logic */
         .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; width: 160px; color: var(--text); }
-        #settings-popup { z-index: 3000; top: 45px; right: 10px; } /* Ensure settings bar is on top */
+        
+        /* Settings popup must be above Home screen (90) and case menus (2000) */
+        #settings-popup { z-index: 9000 !important; top: 45px; right: 10px; } 
+        
         .tab-menu { top: 40px; right: 10px; z-index: 2500; }
         
         button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 13px; width: 100%; color: inherit; }
