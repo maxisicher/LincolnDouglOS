@@ -87,12 +87,7 @@
         .tab-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
         .tab-item.active { border-color: var(--accent); border-width: 2px; font-weight: 700; }
 
-        /* FIX: Final Layering Logic */
         .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; width: 160px; color: var(--text); }
-        
-        /* Settings popup must be above Home screen (90) and case menus (2000) */
-        #settings-popup { z-index: 9000 !important; top: 45px; right: 10px; } 
-        
         .tab-menu { top: 40px; right: 10px; z-index: 2500; }
         
         button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 13px; width: 100%; color: inherit; }
@@ -102,9 +97,13 @@
         #sticky-header { padding: 12px; background: #f0e68c; cursor: move; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #857b26; user-select: none; }
         #sticky-content { flex: 1; border: none; background: transparent; padding: 15px; resize: none; outline: none; font-family: monospace; font-size: 14px; color: #1c1e21; }
 
-        #speech-win { position: fixed; width: 450px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 5000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; border: 1px solid var(--border); color: #1c1e21; }
-        body.dark-mode #speech-win { background: #252525; color: #fff; }
-        #speech-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
+        /* Modified Settings to work exactly like Speech Win */
+        #settings-win, #speech-win { position: fixed; width: 400px; background: white; border-radius: 12px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: none; z-index: 9000; top: 50%; left: 50%; transform: translate(-50%, -50%); overflow: hidden; border: 1px solid var(--border); color: #1c1e21; }
+        #speech-win { width: 450px; }
+        
+        body.dark-mode #settings-win, body.dark-mode #speech-win { background: #252525; color: #fff; }
+        .modal-head { padding: 15px; background: var(--accent); color:white; display:flex; justify-content:space-between; font-weight:700; }
+        
         .speech-table { width:100%; font-size:14px; border-collapse: collapse; }
         .speech-table th { background: #f8f9fa; text-align: left; padding: 12px 15px; border-bottom: 2px solid #dee2e6; color: var(--accent); }
         body.dark-mode .speech-table th { background: #1a1a1a; color: #fff; border-bottom: 2px solid #444; }
@@ -147,12 +146,7 @@
 
     <button class="btn" id="notes-btn" onclick="toggleNotes()" style="display:none; background: #fff9c4; color: #857b26; border: none;">Quick Note</button>
     <button class="btn" id="add-tab-btn" onclick="addTab()" style="display:none;">+ New Block</button>
-    <button class="btn" onclick="toggleSettings(event)">Settings</button>
-    
-    <div id="settings-popup" class="action-popup">
-        <button class="menu-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-        <button class="menu-btn" style="color:red;" onclick="clearAllCases()">Clear All Data</button>
-    </div>
+    <button class="btn" onclick="toggleSettings()">Settings</button>
 </div>
 
 <div id="home-screen">
@@ -187,8 +181,17 @@
     <textarea id="sticky-content" placeholder="Type and drag to sidebar..." oninput="saveNotes()"></textarea>
 </div>
 
+<div id="settings-win">
+    <div class="modal-head"><span>SYSTEM SETTINGS</span><span onclick="toggleSettings()" style="cursor:pointer">×</span></div>
+    <div style="padding: 10px;">
+        <button class="menu-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <hr style="margin: 10px 0;">
+        <button class="menu-btn" style="color:red;" onclick="clearAllCases()">Clear All Data</button>
+    </div>
+</div>
+
 <div id="speech-win">
-    <div id="speech-head"><span>SPEAKER ORDER & TIMES</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
+    <div class="modal-head"><span>SPEAKER ORDER & TIMES</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
     <table class="speech-table">
         <tr><th>Speech</th><th style="text-align:right">Time</th></tr>
         <tr><td>First Affirmative Constructive (1AC)</td><td class="time-col">8:00</td></tr>
@@ -296,9 +299,8 @@
     }
 
     function toggleCaseMenu(e, i) { e.stopPropagation(); closeMenus(); document.getElementById(`case-menu-${i}`).style.display = 'flex'; }
-    function toggleSettings(e) { if(e) e.stopPropagation(); const p = document.getElementById('settings-popup'); const v = p.style.display === 'flex'; closeMenus(); p.style.display = v ? 'none' : 'flex'; }
     function closeMenus() { document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); }
-    window.onclick = (e) => { if (!e.target.closest('.action-popup') && !e.target.closest('.btn')) closeMenus(); };
+    window.onclick = (e) => { if (!e.target.closest('.action-popup') && !e.target.closest('.btn') && !e.target.closest('#settings-win') && !e.target.closest('#speech-win')) closeMenus(); };
 
     function openCase(i) {
         currentCaseIdx = i;
@@ -439,7 +441,22 @@
     function syncMainCase() { if(currentCaseIdx !== null) { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); } }
     function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
     function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
-    function toggleSpeech() { const s = document.getElementById('speech-win'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; }
+    
+    /* Corrected logic to match Speaker Order exactly */
+    function toggleSettings() { 
+        closeMenus();
+        const s = document.getElementById('settings-win'); 
+        s.style.display = s.style.display === 'block' ? 'none' : 'block'; 
+        document.getElementById('speech-win').style.display = 'none';
+    }
+    
+    function toggleSpeech() { 
+        closeMenus();
+        const s = document.getElementById('speech-win'); 
+        s.style.display = s.style.display === 'block' ? 'none' : 'block'; 
+        document.getElementById('settings-win').style.display = 'none';
+    }
+
     function toggleTabMenu(e, i) { e.stopPropagation(); closeMenus(); renderTabs(); document.getElementById(`tab-menu-${i}`).style.display = 'flex'; }
 
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
