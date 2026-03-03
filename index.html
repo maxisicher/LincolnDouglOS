@@ -105,6 +105,9 @@
         .speech-table td { padding: 12px 15px; border-bottom: 1px solid #eee; }
         body.dark-mode .speech-table td { border-bottom: 1px solid #333; }
         .time-col { font-family: monospace; font-weight: bold; color: #d63384; text-align: right; }
+
+        hr { border: 0; border-top: 2px solid var(--border); margin: 20px 0; }
+        body.dark-mode hr { border-top-color: #444; }
     </style>
 </head>
 <body ondragover="event.preventDefault()">
@@ -131,6 +134,7 @@
         <button class="format-btn" onclick="execFormat('bold')">B</button>
         <button class="format-btn" onclick="execFormat('italic')" style="font-style: italic;">I</button>
         <button class="format-btn" onclick="execFormat('underline')" style="text-decoration: underline;">U</button>
+        <button class="format-btn" onclick="execFormat('insertHorizontalRule')" title="Page Break">—</button>
         <button class="format-btn" onclick="changeFontSize(1)">A+</button>
         <button class="format-btn" onclick="changeFontSize(-1)">A-</button>
     </div>
@@ -158,12 +162,12 @@
 </div>
 
 <div id="workspace" ondrop="handleExternalDrop(event)">
-    <div id="main-section"><div id="main-editor" class="doc" contenteditable="true" oninput="syncMainCase()"></div></div>
+    <div id="main-section"><div id="main-editor" class="doc" contenteditable="true" oninput="handleEditorInput(event); syncMainCase();" onkeydown="handleKeyDown(event)"></div></div>
     <div id="resizer"></div>
     <div id="right-zone">
         <div id="tab-view">
             <div id="active-title" style="font-size:34px; margin-bottom:20px; font-weight:700; outline:none;" contenteditable="true" oninput="syncTabTitle()"></div>
-            <div id="active-body" style="outline:none; line-height:1.8; font-size:18px;" contenteditable="true" oninput="syncTabBody()"></div>
+            <div id="active-body" style="outline:none; line-height:1.8; font-size:18px;" contenteditable="true" oninput="handleEditorInput(event); syncTabBody();" onkeydown="handleKeyDown(event)"></div>
         </div>
         <div id="sidebar">
             <div class="search-container"><input type="text" id="sidebar-search" placeholder="Search arguments..." oninput="renderTabs()"></div>
@@ -183,6 +187,38 @@
 
     function execFormat(cmd) { document.execCommand(cmd, false, null); }
     function execCommandWithArg(cmd, arg) { document.execCommand(cmd, false, arg); }
+
+    function handleKeyDown(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const selection = window.getSelection();
+            const container = selection.anchorNode.parentElement.closest('li');
+            
+            if (e.shiftKey) {
+                if (container) document.execCommand('outdent');
+            } else {
+                if (container) {
+                    document.execCommand('indent');
+                } else {
+                    document.execCommand('insertHTML', false, '&#009');
+                }
+            }
+        }
+    }
+
+    function handleEditorInput(e) {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const node = sel.anchorNode;
+        const offset = sel.anchorOffset;
+        const text = node.textContent;
+
+        // Auto-bullet detection: Start of line contains "- " or "* "
+        if (offset === 2 && (text.startsWith('- ') || text.startsWith('* '))) {
+            node.textContent = text.substring(2);
+            document.execCommand('insertUnorderedList');
+        }
+    }
     
     function changeFontSize(dir) {
         const sel = window.getSelection();
@@ -310,14 +346,12 @@
             const idx = parseInt(e.dataTransfer.getData('blockIndex'));
             if (!isNaN(idx)) {
                 const block = cases[currentCaseIdx].tabs[idx];
-                // Strip HTML for the sticky note
                 const tempDiv = document.createElement("div");
                 tempDiv.innerHTML = block.body;
                 document.getElementById('sticky-content').value = tempDiv.innerText || tempDiv.textContent;
                 
                 cases[currentCaseIdx].tabs.splice(idx, 1);
                 noteEl.style.display = 'flex';
-                // Center the sticky note on drop location
                 xOffset = e.clientX - 150;
                 yOffset = e.clientY - 150;
                 noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
