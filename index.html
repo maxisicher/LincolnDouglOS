@@ -126,8 +126,8 @@
     <div style="position: relative;">
         <button class="btn" onclick="toggleSpeakerDropdown(event)">Speaker Order</button>
         <div id="speaker-order-menu" class="action-popup">
-            <button class="menu-btn" onclick="showSpeech(event, 'LD')">Lincoln-Douglas (LD)</button>
-            <button class="menu-btn" onclick="showSpeech(event, 'PF')">Public Forum (PF)</button>
+            <button class="menu-btn" onclick="showSpeech('LD')">Lincoln-Douglas (LD)</button>
+            <button class="menu-btn" onclick="showSpeech('PF')">Public Forum (PF)</button>
         </div>
     </div>
     
@@ -201,7 +201,7 @@
 
 <div id="speech-win">
     <div class="modal-head"><span id="speech-title">SPEAKER ORDER</span><span onclick="closeSpeech()" style="cursor:pointer">×</span></div>
-    <div id="speech-content-container" style="padding: 10px;"></div>
+    <div id="speech-content-container"></div>
 </div>
 
 <script>
@@ -344,8 +344,7 @@
 
     function toggleSpeakerDropdown(e) { e.stopPropagation(); closeMenus(); document.getElementById('speaker-order-menu').style.display = 'flex'; }
     
-    function showSpeech(e, type) {
-        if(e) e.stopPropagation();
+    function showSpeech(type) {
         closeMenus();
         const win = document.getElementById('speech-win');
         const title = document.getElementById('speech-title');
@@ -364,12 +363,12 @@
         } else {
             title.innerText = "PUBLIC FORUM ORDER";
             const pf = [
-                ["1st Speaker Team A (Constructive)", "4:00"], ["1st Speaker Team B (Constructive)", "4:00"],
-                ["Crossfire (A & B)", "3:00"], ["2nd Speaker Team A (Rebuttal)", "4:00"],
-                ["2nd Speaker Team B (Rebuttal)", "4:00"], ["Crossfire (A & B)", "3:00"],
-                ["1st Speaker Team A (Summary)", "3:00"], ["1st Speaker Team B (Summary)", "3:00"],
-                ["Grand Crossfire (All)", "3:00"], ["2nd Speaker Team A (Final Focus)", "2:00"],
-                ["2nd Speaker Team B (Final Focus)", "2:00"]
+                ["First Speaker - Team A (Constructive)", "4:00"], ["First Speaker - Team B (Constructive)", "4:00"],
+                ["Crossfire (A & B)", "3:00"], ["Second Speaker - Team A (Rebuttal)", "4:00"],
+                ["Second Speaker - Team B (Rebuttal)", "4:00"], ["Crossfire (A & B)", "3:00"],
+                ["First Speaker - Team A (Summary)", "3:00"], ["First Speaker - Team B (Summary)", "3:00"],
+                ["Grand Crossfire (All)", "3:00"], ["Second Speaker - Team A (Final Focus)", "2:00"],
+                ["Second Speaker - Team B (Final Focus)", "2:00"]
             ];
             pf.forEach(s => html += `<tr><td>${s[0]}</td><td class="time-col">${s[1]}</td></tr>`);
         }
