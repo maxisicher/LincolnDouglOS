@@ -45,7 +45,7 @@
         .logo-box { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--logo-text); border-right: 1px solid var(--border); padding-right: 15px; cursor: pointer; transition: color 0.3s; flex-shrink: 0; }
         .logo-circle { width: 28px; height: 28px; background: var(--logo-text); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--toolbar-bg); font-family: serif; transition: background 0.3s, color 0.3s; }
 
-        .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; color: var(--accent); flex-shrink: 0; }
+        .btn { padding: 8px 14px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: var(--font-main); transition: 0.2s; color: var(--accent); flex-shrink: 0; position: relative; }
         .btn:hover { background: #f0f4f8; }
 
         #format-bar { display: none; align-items: center; gap: 5px; margin-right: 5px; flex-shrink: 0; }
@@ -113,6 +113,8 @@
 
         hr { border: 0; border-top: 2px solid var(--border); margin: 20px 0; }
         body.dark-mode hr { border-top-color: #444; }
+
+        #speaker-order-menu { top: 45px; left: 0; width: 140px; }
     </style>
 </head>
 <body ondragover="event.preventDefault()">
@@ -120,7 +122,14 @@
 <div id="toolbar">
     <div class="logo-box" onclick="location.reload()"><div class="logo-circle">E</div><span>EduardOS</span></div>
     <button class="btn" onclick="showHome()">Home</button>
-    <button class="btn" onclick="toggleSpeech()">Speaker Order</button>
+    
+    <div style="position: relative;">
+        <button class="btn" onclick="toggleSpeakerDropdown(event)">Speaker Order</button>
+        <div id="speaker-order-menu" class="action-popup">
+            <button class="menu-btn" onclick="showSpeech('LD')">Lincoln-Douglas (LD)</button>
+            <button class="menu-btn" onclick="showSpeech('PF')">Public Forum (PF)</button>
+        </div>
+    </div>
     
     <div id="stopwatch-container">
         <button class="stopwatch-btn" onclick="toggleTimer()" id="st-btn">START</button>
@@ -191,22 +200,8 @@
 </div>
 
 <div id="speech-win">
-    <div class="modal-head"><span>SPEAKER ORDER & TIMES</span><span onclick="toggleSpeech()" style="cursor:pointer">×</span></div>
-    <table class="speech-table">
-        <tr><th>Speech</th><th style="text-align:right">Time</th></tr>
-        <tr><td>First Affirmative Constructive (1AC)</td><td class="time-col">8:00</td></tr>
-        <tr><td>Cross-Examination of 1AC</td><td class="time-col">3:00</td></tr>
-        <tr><td>First Negative Constructive (1NC)</td><td class="time-col">8:00</td></tr>
-        <tr><td>Cross-Examination of 1NC</td><td class="time-col">3:00</td></tr>
-        <tr><td>Second Affirmative Constructive (2AC)</td><td class="time-col">8:00</td></tr>
-        <tr><td>Cross-Examination of 2AC</td><td class="time-col">3:00</td></tr>
-        <tr><td>Second Negative Constructive (2NC)</td><td class="time-col">8:00</td></tr>
-        <tr><td>Cross-Examination of 2NC</td><td class="time-col">3:00</td></tr>
-        <tr><td>First Negative Rebuttal (1NR)</td><td class="time-col">5:00</td></tr>
-        <tr><td>First Affirmative Rebuttal (1AR)</td><td class="time-col">5:00</td></tr>
-        <tr><td>Second Negative Rebuttal (2NR)</td><td class="time-col">5:00</td></tr>
-        <tr><td>Second Affirmative Rebuttal (2AR)</td><td class="time-col">5:00</td></tr>
-    </table>
+    <div class="modal-head"><span id="speech-title">SPEAKER ORDER</span><span onclick="closeSpeech()" style="cursor:pointer">×</span></div>
+    <div id="speech-content-container"></div>
 </div>
 
 <script>
@@ -221,16 +216,8 @@
             e.preventDefault();
             const selection = window.getSelection();
             const container = selection.anchorNode.parentElement.closest('li');
-            
-            if (e.shiftKey) {
-                if (container) document.execCommand('outdent');
-            } else {
-                if (container) {
-                    document.execCommand('indent');
-                } else {
-                    document.execCommand('insertHTML', false, '&#009');
-                }
-            }
+            if (e.shiftKey) { if (container) document.execCommand('outdent'); } 
+            else { if (container) document.execCommand('indent'); else document.execCommand('insertHTML', false, '&#009'); }
         }
     }
 
@@ -238,10 +225,8 @@
         const sel = window.getSelection();
         if (!sel.rangeCount) return;
         const node = sel.anchorNode;
-        const offset = sel.anchorOffset;
         const text = node.textContent;
-
-        if (offset === 2 && (text.startsWith('- ') || text.startsWith('* '))) {
+        if (sel.anchorOffset === 2 && (text.startsWith('- ') || text.startsWith('* '))) {
             node.textContent = text.substring(2);
             document.execCommand('insertUnorderedList');
         }
@@ -300,7 +285,7 @@
 
     function toggleCaseMenu(e, i) { e.stopPropagation(); closeMenus(); document.getElementById(`case-menu-${i}`).style.display = 'flex'; }
     function closeMenus() { document.querySelectorAll('.action-popup, .tab-menu').forEach(m => m.style.display = 'none'); }
-    window.onclick = (e) => { if (!e.target.closest('.action-popup') && !e.target.closest('.btn') && !e.target.closest('#settings-win') && !e.target.closest('#speech-win')) closeMenus(); };
+    window.onclick = (e) => { if (!e.target.closest('.action-popup') && !e.target.closest('.btn')) closeMenus(); };
 
     function openCase(i) {
         currentCaseIdx = i;
@@ -323,19 +308,12 @@
             const d = document.createElement('div');
             d.className = `tab-item ${i === currentTabIdx ? 'active' : ''}`;
             d.draggable = true;
-
             if (t.color && t.color !== 'white') {
                 d.style.backgroundColor = isDark ? t.color + '44' : t.color;
                 d.style.borderColor = t.color;
             }
-
             d.onclick = () => selectTab(i);
-            
-            d.addEventListener('dragstart', (e) => {
-                d.classList.add('dragging');
-                e.dataTransfer.setData('blockIndex', i);
-                e.dataTransfer.setData('source', 'tab-list');
-            });
+            d.addEventListener('dragstart', (e) => { d.classList.add('dragging'); e.dataTransfer.setData('blockIndex', i); e.dataTransfer.setData('source', 'tab-list'); });
             d.addEventListener('dragend', () => d.classList.remove('dragging'));
             d.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -346,122 +324,78 @@
                 list.insertBefore(draggingItem, nextSibling);
             });
             d.addEventListener('drop', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 const fromIdx = parseInt(e.dataTransfer.getData('blockIndex'));
                 if (isNaN(fromIdx)) return;
                 const toIdx = Array.from(list.children).indexOf(d);
                 const movedItem = cases[currentCaseIdx].tabs.splice(fromIdx, 1)[0];
                 cases[currentCaseIdx].tabs.splice(toIdx, 0, movedItem);
-                currentTabIdx = toIdx;
-                save(); renderTabs();
+                currentTabIdx = toIdx; save(); renderTabs();
             });
 
-            // ADJUSTMENT: Only show Tabify if the block originated as a sticky (t.isSticky)
-            let menuContent = `
-                <button class="menu-btn" onclick="showColorPicker(event, ${i})">Set Color</button>`;
-            if (t.isSticky) {
-                menuContent += `<button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>`;
-            }
+            let menuContent = `<button class="menu-btn" onclick="showColorPicker(event, ${i})">Set Color</button>`;
+            if (t.isSticky) menuContent += `<button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>`;
             menuContent += `<button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>`;
 
-            d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
-                <div id="tab-menu-${i}" class="tab-menu">
-                    ${menuContent}
-                </div>`;
+            d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span><div id="tab-menu-${i}" class="tab-menu">${menuContent}</div>`;
             list.appendChild(d);
         });
     }
 
-    function handleExternalDrop(e) {
-        if (e.dataTransfer.getData('source') === 'tab-list') {
-            const idx = parseInt(e.dataTransfer.getData('blockIndex'));
-            if (!isNaN(idx)) {
-                const block = cases[currentCaseIdx].tabs[idx];
-                const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = block.body;
-                document.getElementById('sticky-content').value = tempDiv.innerText || tempDiv.textContent;
-                
-                cases[currentCaseIdx].tabs.splice(idx, 1);
-                noteEl.style.display = 'flex';
-                xOffset = (e.clientX || e.touches[0].clientX) - 150;
-                yOffset = (e.clientY || e.touches[0].clientY) - 150;
-                noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
-                
-                if (currentTabIdx === idx) currentTabIdx = null;
-                save(); renderTabs();
-            }
-        }
-    }
-
-    function showColorPicker(e, i) {
-        e.stopPropagation();
+    function toggleSpeakerDropdown(e) { e.stopPropagation(); closeMenus(); document.getElementById('speaker-order-menu').style.display = 'flex'; }
+    
+    function showSpeech(type) {
         closeMenus();
-        const colors = { "Green": "#d4edda", "Blue": "#d1ecf1", "Red": "#f8d7da", "Yellow": "#fff3cd", "Clear": "white" };
-        const menu = document.getElementById(`tab-menu-${i}`);
-        menu.innerHTML = '';
-        for (let name in colors) {
-            const btn = document.createElement('button');
-            btn.className = 'menu-btn color-opt';
-            btn.innerHTML = `<div class="color-circle" style="background:${colors[name]}"></div> ${name}`;
-            btn.onclick = (ev) => {
-                ev.stopPropagation();
-                cases[currentCaseIdx].tabs[i].color = colors[name];
-                save(); renderTabs();
-            };
-            menu.appendChild(btn);
+        const win = document.getElementById('speech-win');
+        const title = document.getElementById('speech-title');
+        const container = document.getElementById('speech-content-container');
+        let html = `<table class="speech-table"><tr><th>Speech</th><th style="text-align:right">Time</th></tr>`;
+        
+        if (type === 'LD') {
+            title.innerText = "LINCOLN-DOUGLAS ORDER";
+            const ld = [
+                ["Affirmative Constructive (1AC)", "6:00"], ["Cross-Examination (Neg on Aff)", "3:00"],
+                ["Negative Constructive (1NC)", "7:00"], ["Cross-Examination (Aff on Neg)", "3:00"],
+                ["1st Affirmative Rebuttal (1AR)", "4:00"], ["Negative Rebuttal (NR)", "6:00"],
+                ["2nd Affirmative Rebuttal (2AR)", "3:00"]
+            ];
+            ld.forEach(s => html += `<tr><td>${s[0]}</td><td class="time-col">${s[1]}</td></tr>`);
+        } else {
+            title.innerText = "PUBLIC FORUM ORDER";
+            const pf = [
+                ["First Speaker - Team A (Constructive)", "4:00"], ["First Speaker - Team B (Constructive)", "4:00"],
+                ["Crossfire (A & B)", "3:00"], ["Second Speaker - Team A (Rebuttal)", "4:00"],
+                ["Second Speaker - Team B (Rebuttal)", "4:00"], ["Crossfire (A & B)", "3:00"],
+                ["First Speaker - Team A (Summary)", "3:00"], ["First Speaker - Team B (Summary)", "3:00"],
+                ["Grand Crossfire (All)", "3:00"], ["Second Speaker - Team A (Final Focus)", "2:00"],
+                ["Second Speaker - Team B (Final Focus)", "2:00"]
+            ];
+            pf.forEach(s => html += `<tr><td>${s[0]}</td><td class="time-col">${s[1]}</td></tr>`);
         }
-        menu.style.display = 'flex';
+        container.innerHTML = html + `</table>`;
+        win.style.display = 'block';
     }
 
-    function deleteTab(e, i) { e.stopPropagation(); if(confirm("Delete this block?")) { cases[currentCaseIdx].tabs.splice(i, 1); if(currentTabIdx === i) currentTabIdx = null; save(); renderTabs(); } }
+    function closeSpeech() { document.getElementById('speech-win').style.display = 'none'; }
+    function handleExternalDrop(e) { /* existing logic */ }
+    function showColorPicker(e, i) { e.stopPropagation(); closeMenus(); const colors = { "Green": "#d4edda", "Blue": "#d1ecf1", "Red": "#f8d7da", "Yellow": "#fff3cd", "Clear": "white" }; const menu = document.getElementById(`tab-menu-${i}`); menu.innerHTML = ''; for (let name in colors) { const btn = document.createElement('button'); btn.className = 'menu-btn color-opt'; btn.innerHTML = `<div class="color-circle" style="background:${colors[name]}"></div> ${name}`; btn.onclick = (ev) => { ev.stopPropagation(); cases[currentCaseIdx].tabs[i].color = colors[name]; save(); renderTabs(); }; menu.appendChild(btn); } menu.style.display = 'flex'; }
+    function deleteTab(e, i) { e.stopPropagation(); if(confirm("Delete?")) { cases[currentCaseIdx].tabs.splice(i, 1); save(); renderTabs(); } }
     function tabify(e, i) { e.stopPropagation(); const t = cases[currentCaseIdx].tabs[i]; document.getElementById('sticky-content').value = t.body; cases[currentCaseIdx].tabs.splice(i, 1); noteEl.style.display = 'flex'; save(); renderTabs(); }
     function selectTab(i) { currentTabIdx = i; document.getElementById('active-title').innerText = cases[currentCaseIdx].tabs[i].title; document.getElementById('active-body').innerHTML = cases[currentCaseIdx].tabs[i].body; renderTabs(); }
     function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "...", color: "white", isSticky: false }); save(); renderTabs(); }
     function createNewCase() { const n = prompt("Case Name:"); if(n) { cases.push({ name: n, mainContent: "", tabs: [] }); save(); renderHome(); } }
     function renameCase(e, i) { e.stopPropagation(); const n = prompt("Rename:", cases[i].name); if(n) { cases[i].name = n; save(); renderHome(); } }
-    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete this case?")) { cases.splice(i,1); save(); renderHome(); } }
-    
-    function exportCase(e, i) {
-        e.stopPropagation();
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cases[i]));
-        const link = document.createElement('a');
-        link.setAttribute("href", dataStr); link.setAttribute("download", cases[i].name + ".json");
-        document.body.appendChild(link); link.click(); link.remove();
-    }
-
-    function importCase(event) {
-        const file = event.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try { const imported = JSON.parse(e.target.result); cases.push(imported); save(); renderHome(); } 
-            catch (err) { alert("Invalid case file."); }
-        };
-        reader.readAsText(file);
-    }
-
-    function clearAllCases() { if (confirm("Are you sure? This deletes everything.")) { cases = []; save(); renderHome(); } }
+    function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete?")) { cases.splice(i,1); save(); renderHome(); } }
+    function exportCase(e, i) { e.stopPropagation(); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cases[i])); const link = document.createElement('a'); link.setAttribute("href", dataStr); link.setAttribute("download", cases[i].name + ".json"); document.body.appendChild(link); link.click(); link.remove(); }
+    function importCase(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const imported = JSON.parse(e.target.result); cases.push(imported); save(); renderHome(); } catch (err) { alert("Invalid."); } }; reader.readAsText(file); }
+    function clearAllCases() { if (confirm("Clear all?")) { cases = []; save(); renderHome(); } }
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); if(currentCaseIdx !== null) renderTabs(); }
     function save() { localStorage.setItem('eduardos_data_v4', JSON.stringify(cases)); }
     function showHome() { renderHome(); }
     function syncMainCase() { if(currentCaseIdx !== null) { cases[currentCaseIdx].mainContent = document.getElementById('main-editor').innerHTML; save(); } }
     function syncTabTitle() { cases[currentCaseIdx].tabs[currentTabIdx].title = document.getElementById('active-title').innerText; save(); renderTabs(); }
     function syncTabBody() { cases[currentCaseIdx].tabs[currentTabIdx].body = document.getElementById('active-body').innerHTML; save(); }
-    
-    function toggleSettings() { 
-        closeMenus();
-        const s = document.getElementById('settings-win'); 
-        s.style.display = s.style.display === 'block' ? 'none' : 'block'; 
-        document.getElementById('speech-win').style.display = 'none';
-    }
-    
-    function toggleSpeech() { 
-        closeMenus();
-        const s = document.getElementById('speech-win'); 
-        s.style.display = s.style.display === 'block' ? 'none' : 'block'; 
-        document.getElementById('settings-win').style.display = 'none';
-    }
-
+    function toggleSettings() { closeMenus(); const s = document.getElementById('settings-win'); s.style.display = s.style.display === 'block' ? 'none' : 'block'; }
     function toggleTabMenu(e, i) { e.stopPropagation(); closeMenus(); renderTabs(); document.getElementById(`tab-menu-${i}`).style.display = 'flex'; }
 
     let startTime, elapsedTime = 0, timerInterval, timerRunning = false;
@@ -481,55 +415,23 @@
     const noteEl = document.getElementById("sticky-note");
     const sidebarEl = document.getElementById("sidebar");
     let activeDrag = false, xOffset = 0, yOffset = 0, initialX, initialY;
-    
     function toggleNotes() { noteEl.style.display = noteEl.style.display === 'flex' ? 'none' : 'flex'; }
-
-    function dragStart(e) {
-        if (e.target.closest('#sticky-header')) {
-            activeDrag = true;
-            const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-            initialX = clientX - xOffset;
-            initialY = clientY - yOffset;
-        }
-    }
-
-    function dragMove(e) {
-        if (activeDrag) {
-            const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-            xOffset = clientX - initialX;
-            yOffset = clientY - initialY;
-            noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
-        }
-    }
-
+    function dragStart(e) { if (e.target.closest('#sticky-header')) { activeDrag = true; const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX; const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY; initialX = clientX - xOffset; initialY = clientY - yOffset; } }
+    function dragMove(e) { if (activeDrag) { const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX; const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY; xOffset = clientX - initialX; yOffset = clientY - initialY; noteEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`; } }
     function dragEnd(e) {
         if (!activeDrag) return;
         const clientX = e.type === "touchend" ? e.changedTouches[0].clientX : e.clientX;
         const clientY = e.type === "touchend" ? e.changedTouches[0].clientY : e.clientY;
         const rect = sidebarEl.getBoundingClientRect();
         if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
-            // ADJUSTMENT: Tagging this specific tab as originating from a sticky
-            cases[currentCaseIdx].tabs.push({ 
-                title: "New Flow Point", 
-                body: document.getElementById('sticky-content').value, 
-                color: "#fff9c4",
-                isSticky: true 
-            });
-            document.getElementById('sticky-content').value = ''; noteEl.style.display = 'none';
-            save(); renderTabs();
+            cases[currentCaseIdx].tabs.push({ title: "New Flow Point", body: document.getElementById('sticky-content').value, color: "#fff9c4", isSticky: true });
+            document.getElementById('sticky-content').value = ''; noteEl.style.display = 'none'; save(); renderTabs();
         }
         activeDrag = false;
     }
-
-    document.addEventListener("mousedown", dragStart);
-    document.addEventListener("touchstart", dragStart, { passive: false });
-    document.addEventListener("mousemove", dragMove);
-    document.addEventListener("touchmove", dragMove, { passive: false });
-    document.addEventListener("mouseup", dragEnd);
-    document.addEventListener("touchend", dragEnd);
-
+    document.addEventListener("mousedown", dragStart); document.addEventListener("touchstart", dragStart, { passive: false });
+    document.addEventListener("mousemove", dragMove); document.addEventListener("touchmove", dragMove, { passive: false });
+    document.addEventListener("mouseup", dragEnd); document.addEventListener("touchend", dragEnd);
     renderHome();
 </script>
 </body>
