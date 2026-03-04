@@ -81,15 +81,16 @@
         .search-container { padding: 15px; border-bottom: 1px solid #eee; }
         #sidebar-search { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box; background: transparent; color: inherit; }
         
-        /* FIX: Added bottom padding to ensure the last block is scrollable and visible */
-        #tab-list { flex: 1; overflow-y: auto; padding: 10px 0 100px 0; -webkit-overflow-scrolling: touch; }
+        /* FIX: Increased bottom padding to 200px for menu visibility */
+        #tab-list { flex: 1; overflow-y: auto; padding: 10px 0 200px 0; -webkit-overflow-scrolling: touch; }
         
         .tab-item { position: relative; padding: 14px; margin: 5px 15px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: grab; font-size: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
         .tab-item:active { cursor: grabbing; }
         .tab-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
         .tab-item.active { border-color: var(--accent); border-width: 2px; font-weight: 700; }
 
-        .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; width: 160px; color: var(--text); }
+        /* FIX: Changed overflow to visible so menu doesn't cut off */
+        .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; flex-direction: column; overflow: visible; border: 1px solid #eee; width: 160px; color: var(--text); }
         .tab-menu { top: 40px; right: 10px; z-index: 2500; }
         
         button.menu-btn { border: none; background: none; padding: 10px 15px; text-align: left; cursor: pointer; font-size: 13px; width: 100%; color: inherit; }
