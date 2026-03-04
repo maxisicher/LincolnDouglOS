@@ -81,7 +81,6 @@
         .search-container { padding: 15px; border-bottom: 1px solid #eee; }
         #sidebar-search { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box; background: transparent; color: inherit; }
         
-        /* FIX: Increased bottom padding to 200px for menu visibility */
         #tab-list { flex: 1; overflow-y: auto; padding: 10px 0 200px 0; -webkit-overflow-scrolling: touch; }
         
         .tab-item { position: relative; padding: 14px; margin: 5px 15px; background: white; border: 1px solid var(--border); border-radius: 8px; cursor: grab; font-size: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
@@ -89,7 +88,6 @@
         .tab-item.dragging { opacity: 0.5; border: 2px dashed var(--accent); }
         .tab-item.active { border-color: var(--accent); border-width: 2px; font-weight: 700; }
 
-        /* FIX: Changed overflow to visible so menu doesn't cut off */
         .action-popup, .tab-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; flex-direction: column; overflow: visible; border: 1px solid #eee; width: 160px; color: var(--text); }
         .tab-menu { top: 40px; right: 10px; z-index: 2500; }
         
@@ -359,11 +357,17 @@
                 save(); renderTabs();
             });
 
+            // ADJUSTMENT: Only show Tabify if the block originated as a sticky (t.isSticky)
+            let menuContent = `
+                <button class="menu-btn" onclick="showColorPicker(event, ${i})">Set Color</button>`;
+            if (t.isSticky) {
+                menuContent += `<button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>`;
+            }
+            menuContent += `<button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>`;
+
             d.innerHTML = `<span>${t.title}</span><span onclick="toggleTabMenu(event, ${i})">⋮</span>
                 <div id="tab-menu-${i}" class="tab-menu">
-                    <button class="menu-btn" onclick="showColorPicker(event, ${i})">Set Color</button>
-                    <button class="menu-btn" onclick="tabify(event, ${i})">Tabify (Sticky)</button>
-                    <button class="menu-btn" style="color:red" onclick="deleteTab(event, ${i})">Delete</button>
+                    ${menuContent}
                 </div>`;
             list.appendChild(d);
         });
@@ -413,7 +417,7 @@
     function deleteTab(e, i) { e.stopPropagation(); if(confirm("Delete this block?")) { cases[currentCaseIdx].tabs.splice(i, 1); if(currentTabIdx === i) currentTabIdx = null; save(); renderTabs(); } }
     function tabify(e, i) { e.stopPropagation(); const t = cases[currentCaseIdx].tabs[i]; document.getElementById('sticky-content').value = t.body; cases[currentCaseIdx].tabs.splice(i, 1); noteEl.style.display = 'flex'; save(); renderTabs(); }
     function selectTab(i) { currentTabIdx = i; document.getElementById('active-title').innerText = cases[currentCaseIdx].tabs[i].title; document.getElementById('active-body').innerHTML = cases[currentCaseIdx].tabs[i].body; renderTabs(); }
-    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "...", color: "white" }); save(); renderTabs(); }
+    function addTab() { cases[currentCaseIdx].tabs.push({ title: "New Block", body: "...", color: "white", isSticky: false }); save(); renderTabs(); }
     function createNewCase() { const n = prompt("Case Name:"); if(n) { cases.push({ name: n, mainContent: "", tabs: [] }); save(); renderHome(); } }
     function renameCase(e, i) { e.stopPropagation(); const n = prompt("Rename:", cases[i].name); if(n) { cases[i].name = n; save(); renderHome(); } }
     function deleteCase(e, i) { e.stopPropagation(); if(confirm("Delete this case?")) { cases.splice(i,1); save(); renderHome(); } }
@@ -506,7 +510,13 @@
         const clientY = e.type === "touchend" ? e.changedTouches[0].clientY : e.clientY;
         const rect = sidebarEl.getBoundingClientRect();
         if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
-            cases[currentCaseIdx].tabs.push({ title: "New Flow Point", body: document.getElementById('sticky-content').value, color: "#fff9c4" });
+            // ADJUSTMENT: Tagging this specific tab as originating from a sticky
+            cases[currentCaseIdx].tabs.push({ 
+                title: "New Flow Point", 
+                body: document.getElementById('sticky-content').value, 
+                color: "#fff9c4",
+                isSticky: true 
+            });
             document.getElementById('sticky-content').value = ''; noteEl.style.display = 'none';
             save(); renderTabs();
         }
